@@ -77,6 +77,7 @@ class RevenueController
         $date_from = $_GET['date_from'] ?? date('Y-m-01'); // First day of current month
         $date_to = $_GET['date_to'] ?? date('Y-m-t'); // Last day of current month (for detailed view)
         $status = $_GET['status'] ?? '';
+        $room_type = $_GET['room_type'] ?? '';
         $sort_by = $_GET['sort_by'] ?? 'created_at';
         $sort_order = $_GET['sort_order'] ?? 'DESC';
 
@@ -91,7 +92,7 @@ class RevenueController
         }
 
         // Get detailed bookings
-        $detailed_bookings = $this->bookingModel->getDetailedRevenue($date_from, $date_to, $status, $sort_by, $sort_order);
+        $detailed_bookings = $this->bookingModel->getDetailedRevenue($date_from, $date_to, $status, $room_type, $sort_by, $sort_order);
 
         // Calculate totals
         $totals = [
