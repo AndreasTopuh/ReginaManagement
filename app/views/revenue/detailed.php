@@ -134,7 +134,7 @@ include INCLUDES_PATH . '/header.php';
 
         dateFromInput.value = fromDate.toISOString().split('T')[0];
         dateToInput.value = toDate.toISOString().split('T')[0];
-        
+
         // Auto-submit form after setting dates
         setTimeout(() => {
             document.querySelector('form').submit();
