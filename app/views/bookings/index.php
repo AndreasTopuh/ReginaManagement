@@ -7,7 +7,7 @@ include INCLUDES_PATH . '/header.php';
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-calendar-check"></i> Bookings Management</h1>
-            <a href="bookings.php?action=create" class="btn btn-primary">
+            <a href="<?= BASE_URL ?>/bookings/create" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Booking
             </a>
         </div>
@@ -50,7 +50,7 @@ include INCLUDES_PATH . '/header.php';
                         <button type="submit" class="btn btn-outline-primary">
                             <i class="fas fa-search"></i> Search
                         </button>
-                        <a href="bookings.php" class="btn btn-outline-secondary">
+                        <a href="<?= BASE_URL ?>/bookings" class="btn btn-outline-secondary">
                             <i class="fas fa-times"></i> Reset
                         </a>
                     </div>
@@ -73,7 +73,7 @@ include INCLUDES_PATH . '/header.php';
                     <i class="fas fa-calendar-times fa-3x mb-3"></i>
                     <h5>No bookings found</h5>
                     <p>No bookings match your current search criteria.</p>
-                    <a href="bookings.php?action=create" class="btn btn-primary">Create First Booking</a>
+                    <a href="<?= BASE_URL ?>/bookings/create" class="btn btn-primary">Create First Booking</a>
                 </div>
                 <?php else: ?>
                 <div class="table-responsive">
@@ -96,7 +96,7 @@ include INCLUDES_PATH . '/header.php';
                             <?php foreach ($bookings as $booking): ?>
                             <tr>
                                 <td>
-                                    <a href="<?= BASE_URL ?>/bookings_detail.php?id=<?= $booking['id'] ?>" 
+                                    <a href="<?= BASE_URL ?>/bookings/<?= $booking['id'] ?>" 
                                        class="text-decoration-none fw-bold">
                                         <?= htmlspecialchars($booking['booking_code']) ?>
                                     </a>
@@ -131,7 +131,7 @@ include INCLUDES_PATH . '/header.php';
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="<?= BASE_URL ?>/bookings_detail.php?id=<?= $booking['id'] ?>" 
+                                        <a href="<?= BASE_URL ?>/bookings/<?= $booking['id'] ?>" 
                                            class="btn btn-outline-primary" data-bs-toggle="tooltip" title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>

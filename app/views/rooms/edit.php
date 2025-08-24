@@ -7,7 +7,7 @@ include INCLUDES_PATH . '/header.php';
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-edit"></i> Edit Room <?= htmlspecialchars($room['room_number']) ?></h1>
-            <a href="<?= BASE_URL ?>/rooms.php" class="btn btn-outline-secondary">
+            <a href="<?= BASE_URL ?>/rooms" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Rooms
             </a>
         </div>
@@ -106,7 +106,7 @@ include INCLUDES_PATH . '/header.php';
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Update Room
                         </button>
-                        <a href="<?= BASE_URL ?>/rooms.php" class="btn btn-outline-secondary">
+                        <a href="<?= BASE_URL ?>/rooms" class="btn btn-outline-secondary">
                             <i class="fas fa-times"></i> Cancel
                         </a>
                     </div>

@@ -68,7 +68,7 @@ class Booking
 
     public function getBookingRooms($booking_id)
     {
-        $sql = "SELECT br.*, r.room_number, rt.type_name, rt.price,
+        $sql = "SELECT br.*, r.room_number, rt.type_name, rt.price as price_per_night,
                        br.rate_per_night as booked_rate_per_night, f.floor_number
                 FROM booking_rooms br 
                 JOIN rooms r ON br.room_id = r.id 
@@ -286,9 +286,9 @@ class Booking
         $sql = "SELECT 
                     COUNT(*) as total_bookings,
                     SUM(CASE WHEN b.status = 'Pending' THEN 1 ELSE 0 END) as pending_bookings,
-                    SUM(CASE WHEN b.status = 'CheckedIn' THEN 1 ELSE 0 END) as checked_in_bookings,
-                    SUM(CASE WHEN b.status = 'CheckedOut' THEN 1 ELSE 0 END) as checked_out_bookings,
-                    SUM(CASE WHEN b.status = 'Cancelled' THEN 1 ELSE 0 END) as canceled_bookings,
+                    SUM(CASE WHEN b.status = 'CheckedIn' THEN 1 ELSE 0 END) as checkedin_bookings,
+                    SUM(CASE WHEN b.status = 'CheckedOut' THEN 1 ELSE 0 END) as checkedout_bookings,
+                    SUM(CASE WHEN b.status = 'Cancelled' THEN 1 ELSE 0 END) as cancelled_bookings,
                     COALESCE(SUM(b.grand_total), 0) as total_revenue
                 FROM bookings b 
                 $where_clause";
@@ -528,15 +528,23 @@ class Booking
     {
         $sql = "SELECT 
                     COUNT(DISTINCT br.room_id) as occupied_rooms,
-                    (SELECT COUNT(*) FROM rooms WHERE status = 'Available') as total_rooms,
-                    ROUND(COUNT(DISTINCT br.room_id) * 100.0 / (SELECT COUNT(*) FROM rooms WHERE status = 'Available'), 2) as occupancy_rate,
+                    (SELECT COUNT(*) FROM rooms) as total_rooms,
+                    ROUND(COUNT(DISTINCT br.room_id) * 100.0 / (SELECT COUNT(*) FROM rooms), 2) as occupancy_rate,
                     AVG(DATEDIFF(b.checkout_date, b.checkin_date)) as avg_stay_duration
                 FROM bookings b
                 JOIN booking_rooms br ON b.id = br.booking_id
                 WHERE b.checkin_date BETWEEN ? AND ?
                 AND b.status IN ('CheckedIn', 'CheckedOut')";
 
-        return $this->db->fetch($sql, [$date_from, $date_to]);
+        $result = $this->db->fetchOne($sql, [$date_from, $date_to]);
+        
+        // Ensure we return valid data even if no results
+        return $result ?: [
+            'occupied_rooms' => 0,
+            'total_rooms' => 0,
+            'occupancy_rate' => 0,
+            'avg_stay_duration' => 0
+        ];
     }
 
     public function getRevenueGrowth($date_from, $date_to)
@@ -553,10 +561,12 @@ class Booking
                 AND status != 'Cancelled'";
 
         // Current period revenue
-        $current_revenue = $this->db->fetch($sql, [$date_from, $date_to])['revenue'];
+        $current_result = $this->db->fetchOne($sql, [$date_from, $date_to]);
+        $current_revenue = $current_result['revenue'] ?? 0;
 
         // Previous period revenue
-        $previous_revenue = $this->db->fetch($sql, [$prev_date_from, $prev_date_to])['revenue'];
+        $previous_result = $this->db->fetchOne($sql, [$prev_date_from, $prev_date_to]);
+        $previous_revenue = $previous_result['revenue'] ?? 0;
 
         $growth_rate = 0;
         if ($previous_revenue > 0) {

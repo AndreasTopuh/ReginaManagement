@@ -8,10 +8,10 @@ include INCLUDES_PATH . '/header.php';
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-chart-line"></i> Revenue Reports</h1>
             <div class="btn-group">
-                <a href="<?= BASE_URL ?>/revenue.php?action=detailed" class="btn btn-outline-primary">
+                <a href="<?= BASE_URL ?>/revenue?action=detailed" class="btn btn-outline-primary">
                     <i class="fas fa-list"></i> Detailed Report
                 </a>
-                <a href="<?= BASE_URL ?>/revenue.php?action=export&format=csv&type=summary&date_from=<?= $date_from ?>&date_to=<?= $date_to ?>" class="btn btn-outline-success">
+                <a href="<?= BASE_URL ?>/revenue?action=export&format=csv&type=summary&date_from=<?= $date_from ?>&date_to=<?= $date_to ?>" class="btn btn-outline-success">
                     <i class="fas fa-download"></i> Export CSV
                 </a>
             </div>

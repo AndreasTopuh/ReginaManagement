@@ -7,9 +7,11 @@ class SessionManager {
     public static function start() {
         if (session_status() === PHP_SESSION_NONE) {
             // Security settings
-            ini_set('session.cookie_httponly', 1);
-            ini_set('session.use_only_cookies', 1);
-            ini_set('session.cookie_secure', isset($_SERVER['HTTPS']));
+            if (!headers_sent()) {
+                ini_set('session.cookie_httponly', 1);
+                ini_set('session.use_only_cookies', 1);
+                ini_set('session.cookie_secure', isset($_SERVER['HTTPS']));
+            }
             
             session_start();
         }
@@ -23,7 +25,8 @@ class SessionManager {
         if (!self::isLoggedIn()) {
             // Store intended URL
             $_SESSION['intended_url'] = $_SERVER['REQUEST_URI'];
-            redirect('/login.php');
+            http_response_code(302);
+            header('Location: ' . BASE_URL . '/login');
             exit;
         }
         
@@ -33,7 +36,8 @@ class SessionManager {
             if (time() - $_SESSION['last_activity'] > $timeout) {
                 self::destroy();
                 setFlashMessage('error', 'Sesi Anda telah berakhir. Silakan login kembali.');
-                redirect('/login.php');
+                http_response_code(302);
+                header('Location: ' . BASE_URL . '/login');
                 exit;
             }
         }
@@ -52,7 +56,8 @@ class SessionManager {
         
         if (!in_array($user_role, $required_roles)) {
             setFlashMessage('error', 'Anda tidak memiliki akses ke halaman ini.');
-            redirect('/dashboard.php');
+            http_response_code(302);
+            header('Location: ' . BASE_URL . '/dashboard');
             exit;
         }
     }

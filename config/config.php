@@ -8,19 +8,21 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Base paths
-define('BASE_PATH', dirname(__DIR__));
-define('APP_PATH', BASE_PATH . '/app');
-define('PUBLIC_PATH', BASE_PATH . '/public');
-define('CONFIG_PATH', BASE_PATH . '/config');
-define('INCLUDES_PATH', BASE_PATH . '/includes');
+// Base paths (only define if not already defined)
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', dirname(__DIR__));
+    define('APP_PATH', BASE_PATH . '/app');
+    define('PUBLIC_PATH', BASE_PATH . '/public');
+    define('CONFIG_PATH', BASE_PATH . '/config');
+    define('INCLUDES_PATH', BASE_PATH . '/includes');
+}
 
 // Start session with security
 require_once APP_PATH . '/helpers/SessionManager.php';
 SessionManager::start();
 
 // Base URL (adjust according to your setup)
-define('BASE_URL', 'http://103.162.115.122/reginahotel');
+define('BASE_URL', 'http://103.162.115.122/reginahotel/public');
 define('ASSETS_URL', BASE_URL . '/assets');
 
 // Database configuration
@@ -38,6 +40,7 @@ define('MIDTRANS_MERCHANT_ID', 'your-merchant-id-here');
 // Application settings
 define('APP_NAME', 'Regina Hotel Management System');
 define('APP_VERSION', '1.0.0');
+define('APP_DEBUG', true); // Set to false in production
 define('TIMEZONE', 'Asia/Jakarta');
 
 // Set timezone
@@ -49,6 +52,7 @@ spl_autoload_register(function ($class) {
         APP_PATH . '/controllers/',
         APP_PATH . '/models/',
         APP_PATH . '/helpers/',
+        APP_PATH . '/core/',
         CONFIG_PATH . '/',
         INCLUDES_PATH . '/'
     ];

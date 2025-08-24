@@ -7,7 +7,7 @@ include INCLUDES_PATH . '/header.php';
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-building"></i> Floor Management</h1>
-            <a href="floors.php?action=add" class="btn btn-primary">
+            <a href="<?= BASE_URL ?>/floors/create" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add Floor
             </a>
         </div>
@@ -23,7 +23,7 @@ include INCLUDES_PATH . '/header.php';
                 <i class="fas fa-building fa-3x text-muted mb-3"></i>
                 <h5>No floors found</h5>
                 <p class="text-muted">Start by adding your first floor.</p>
-                <a href="floors.php?action=add" class="btn btn-primary">Add First Floor</a>
+                <a href="<?= BASE_URL ?>/floors/create" class="btn btn-primary">Add First Floor</a>
             </div>
         </div>
     </div>
@@ -42,12 +42,12 @@ include INCLUDES_PATH . '/header.php';
                     </button>
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="dropdown-item" href="floors.php?action=detail&id=<?= $floor['id'] ?>">
+                            <a class="dropdown-item" href="<?= BASE_URL ?>/floors/<?= $floor['id'] ?>">
                                 <i class="fas fa-eye"></i> View Details
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="floors.php?action=edit&id=<?= $floor['id'] ?>">
+                            <a class="dropdown-item" href="<?= BASE_URL ?>/floors/<?= $floor['id'] ?>">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
                         </li>
@@ -105,11 +105,11 @@ include INCLUDES_PATH . '/header.php';
             </div>
             <div class="card-footer">
                 <div class="d-flex gap-2">
-                    <a href="floors.php?action=detail&id=<?= $floor['id'] ?>" 
+                    <a href="<?= BASE_URL ?>/floors/<?= $floor['id'] ?>" 
                        class="btn btn-sm btn-outline-primary flex-fill">
                         <i class="fas fa-eye"></i> View Details
                     </a>
-                    <a href="floors.php?action=edit&id=<?= $floor['id'] ?>" 
+                    <a href="<?= BASE_URL ?>/floors/<?= $floor['id'] ?>" 
                        class="btn btn-sm btn-outline-warning">
                         <i class="fas fa-edit"></i>
                     </a>

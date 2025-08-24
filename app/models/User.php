@@ -34,6 +34,16 @@ class User
         return $this->db->fetchOne($sql, [$id]);
     }
 
+    public function findByUsername($username)
+    {
+        $sql = "SELECT u.*, r.role_name 
+                FROM users u 
+                JOIN roles r ON u.role_id = r.id 
+                WHERE u.username = ?";
+
+        return $this->db->fetchOne($sql, [$username]);
+    }
+
     // Alias for consistency with UserController
     public function getUserById($id)
     {
@@ -190,5 +200,44 @@ class User
     {
         $sql = "SELECT * FROM roles ORDER BY id ASC";
         return $this->db->fetchAll($sql);
+    }
+
+    public function update($id, $data)
+    {
+        $sql = "UPDATE users SET ";
+        $fields = [];
+        $params = [];
+        
+        if (isset($data['name'])) {
+            $fields[] = "name = ?";
+            $params[] = $data['name'];
+        }
+        
+        if (isset($data['username'])) {
+            $fields[] = "username = ?";
+            $params[] = $data['username'];
+        }
+        
+        if (isset($data['password'])) {
+            $fields[] = "password = ?";
+            $params[] = $data['password'];
+        }
+        
+        if (isset($data['role_id'])) {
+            $fields[] = "role_id = ?";
+            $params[] = $data['role_id'];
+        }
+        
+        $sql .= implode(", ", $fields);
+        $sql .= " WHERE id = ?";
+        $params[] = $id;
+        
+        return $this->db->execute($sql, $params);
+    }
+
+    public function updateStatus($id, $status)
+    {
+        $sql = "UPDATE users SET status = ? WHERE id = ?";
+        return $this->db->execute($sql, [$status, $id]);
     }
 }

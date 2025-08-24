@@ -34,11 +34,14 @@ class BookingController extends BaseController {
     public function create() {
         $this->requireLogin();
         
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            return $this->store();
+        }
+        
         return $this->showCreateForm();
     }
     
     public function store() {
-        $this->requireLogin();
         return $this->handleCreateBooking();
     }
     
@@ -162,15 +165,10 @@ class BookingController extends BaseController {
             }
             
             // Create or get guest
-            $guest_id = null;
-            if (!empty($guest_data['id_number'])) {
-                $existing_guest = $this->guestModel->findByIdNumber($guest_data['id_number']);
-                if ($existing_guest) {
-                    $guest_id = $existing_guest['id'];
-                }
-            }
-            
-            if (!$guest_id) {
+            $existing_guest = $this->guestModel->findByIdNumber($guest_data['id_number']);
+            if ($existing_guest) {
+                $guest_id = $existing_guest['id'];
+            } else {
                 $guest_id = $this->guestModel->create($guest_data);
             }
             
@@ -183,7 +181,7 @@ class BookingController extends BaseController {
                 if ($room) {
                     $rooms_data[] = [
                         'room_id' => $room_id,
-                        'price_per_night' => $room['price'] // Use 'price' field from room_types table
+                        'price_per_night' => $room['price_per_night']
                     ];
                 }
             }
@@ -222,44 +220,11 @@ class BookingController extends BaseController {
     }
     
     private function showCreateForm() {
-        $checkin_date = $_POST['checkin_date'] ?? $_GET['checkin_date'] ?? '';
-        $checkout_date = $_POST['checkout_date'] ?? $_GET['checkout_date'] ?? '';
-        
-        // Get all available rooms if no dates specified
-        if (empty($checkin_date) || empty($checkout_date)) {
-            $available_rooms = $this->roomModel->getAllAvailableRooms();
-        } else {
-            // Get rooms available for specific dates
-            $available_rooms = $this->roomModel->getAvailableRooms($checkin_date, $checkout_date);
-        }
-        
-        // Get ID types for guest form
-        $id_types = $this->guestModel->getIdTypes();
+        $rooms = $this->roomModel->getAll('Available');
         
         $this->render('bookings/create', [
             'title' => 'Create New Booking - Regina Hotel',
-            'available_rooms' => $available_rooms,
-            'id_types' => $id_types
-        ]);
-    }
-
-    public function checkAvailability() {
-        $this->requireLogin();
-        
-        $checkin_date = $_POST['checkin_date'] ?? '';
-        $checkout_date = $_POST['checkout_date'] ?? '';
-        
-        if (empty($checkin_date) || empty($checkout_date)) {
-            $this->json(['error' => 'Please select check-in and check-out dates']);
-            return;
-        }
-        
-        $available_rooms = $this->roomModel->getAvailableRooms($checkin_date, $checkout_date);
-        
-        $this->json([
-            'success' => true,
-            'rooms' => $available_rooms,
-            'count' => count($available_rooms)
+            'rooms' => $rooms
         ]);
     }
 }

@@ -7,7 +7,7 @@ include INCLUDES_PATH . '/header.php';
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-plus"></i> Create New Booking</h1>
-            <a href="<?= BASE_URL ?>/bookings.php" class="btn btn-outline-secondary">
+            <a href="<?= BASE_URL ?>/bookings" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Bookings
             </a>
         </div>
@@ -192,7 +192,7 @@ include INCLUDES_PATH . '/header.php';
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Create Booking
                 </button>
-                <a href="<?= BASE_URL ?>/bookings.php" class="btn btn-outline-secondary">
+                <a href="<?= BASE_URL ?>/bookings" class="btn btn-outline-secondary">
                     <i class="fas fa-times"></i> Cancel
                 </a>
             </div>
@@ -252,8 +252,178 @@ include INCLUDES_PATH . '/header.php';
             checkoutDate.addEventListener('change', calculateBookingSummary);
         }
 
+        // Check availability button functionality
+        const checkAvailabilityBtn = document.getElementById('check-availability');
+        if (checkAvailabilityBtn) {
+            checkAvailabilityBtn.addEventListener('click', checkRoomAvailability);
+        }
+
         // Initial calculation
         calculateBookingSummary();
+
+        function checkRoomAvailability() {
+            const checkinDate = document.getElementById('checkin_date').value;
+            const checkoutDate = document.getElementById('checkout_date').value;
+
+            if (!checkinDate || !checkoutDate) {
+                alert('Please select both check-in and check-out dates');
+                return;
+            }
+
+            if (new Date(checkinDate) >= new Date(checkoutDate)) {
+                alert('Check-out date must be after check-in date');
+                return;
+            }
+
+            // Disable button and show loading
+            checkAvailabilityBtn.disabled = true;
+            checkAvailabilityBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('checkin_date', checkinDate);
+            formData.append('checkout_date', checkoutDate);
+
+            // Make AJAX request
+            fetch('<?= BASE_URL ?>/bookings/checkAvailability', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update room selection area
+                    updateRoomSelection(data.rooms);
+                    // Show success message
+                    showMessage('success', `Found ${data.count} available rooms for selected dates`);
+                } else {
+                    showMessage('error', data.error || 'Error checking availability');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('error', 'Error checking room availability');
+            })
+            .finally(() => {
+                // Re-enable button
+                checkAvailabilityBtn.disabled = false;
+                checkAvailabilityBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Room Availability';
+            });
+        }
+
+        function updateRoomSelection(rooms) {
+            let roomSelectionHtml = '';
+
+            if (rooms.length > 0) {
+                roomSelectionHtml = `
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-bed"></i> Select Rooms (${rooms.length} available)</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                `;
+
+                rooms.forEach(room => {
+                    roomSelectionHtml += `
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card room-card h-100">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input class="form-check-input room-checkbox" type="checkbox"
+                                            name="selected_rooms[]" value="${room.id}"
+                                            id="room_${room.id}"
+                                            data-price="${room.price}">
+                                        <label class="form-check-label fw-bold" for="room_${room.id}">
+                                            Room ${room.room_number}
+                                        </label>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-info">${room.type_name}</span>
+                                            <span class="badge bg-success">Floor ${room.floor_number}</span>
+                                        </div>
+                                        <div class="mt-2">
+                                            <strong>Rp ${parseInt(room.price).toLocaleString('id-ID')}</strong>
+                                            <small class="text-muted">/night</small>
+                                        </div>
+                                        ${room.features ? `<div class="mt-1"><small class="text-muted">${room.features}</small></div>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                roomSelectionHtml += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                roomSelectionHtml = `
+                    <div class="card mb-4">
+                        <div class="card-body text-center py-4">
+                            <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+                            <h5>No Rooms Available</h5>
+                            <p class="text-muted">No rooms are available for the selected dates. Please try different dates.</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Find the booking details card and insert room selection after it
+            const bookingDetailsHeaders = document.querySelectorAll('.card h5');
+            let bookingDetailsCard = null;
+            bookingDetailsHeaders.forEach(header => {
+                if (header.textContent.includes('Booking Details')) {
+                    bookingDetailsCard = header.closest('.card');
+                }
+            });
+            
+            if (bookingDetailsCard) {
+                // Remove existing room selection card if it exists
+                let nextElement = bookingDetailsCard.nextElementSibling;
+                if (nextElement && nextElement.classList.contains('card')) {
+                    const nextHeader = nextElement.querySelector('h5');
+                    if (nextHeader && nextHeader.textContent.includes('Select Rooms')) {
+                        nextElement.remove();
+                    }
+                }
+                
+                // Insert new room selection
+                bookingDetailsCard.insertAdjacentHTML('afterend', roomSelectionHtml);
+
+                // Reattach event listeners to new checkboxes
+                const newCheckboxes = document.querySelectorAll('.room-checkbox');
+                newCheckboxes.forEach(function(checkbox) {
+                    checkbox.addEventListener('change', function() {
+                        calculateBookingSummary();
+                    });
+                });
+            }
+        }
+
+        function showMessage(type, message) {
+            // Create alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // Insert at top of form
+            const form = document.querySelector('form');
+            form.insertBefore(alertDiv, form.firstChild);
+
+            // Auto dismiss after 3 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
 
         function calculateBookingSummary() {
             const selectedRooms = document.querySelectorAll('.room-checkbox:checked');

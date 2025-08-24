@@ -1,26 +1,44 @@
 <?php
-class AuthController
-{
+class AuthController extends BaseController {
     private $userModel;
-
-    public function __construct()
-    {
+    
+    public function __construct() {
+        parent::__construct();
         $this->userModel = new User();
     }
-
-    public function login()
-    {
+    
+    public function checkAuth() {
+        if (SessionManager::isLoggedIn()) {
+            $this->redirect('/dashboard');
+        } else {
+            $this->redirect('/login');
+        }
+    }
+    
+    public function showLogin() {
         // Redirect if already logged in
-        if (isset($_SESSION['user_id'])) {
-            redirect('/dashboard.php');
+        if (SessionManager::isLoggedIn()) {
+            $this->redirect('/dashboard');
             return;
         }
-
+        
+        $this->render('auth/login', [
+            'title' => 'Login - Regina Hotel'
+        ]);
+    }
+    
+    public function login() {
+        // Redirect if already logged in
+        if (SessionManager::isLoggedIn()) {
+            $this->redirect('/dashboard');
+            return;
+        }
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return $this->handleLoginSubmit();
         }
-
-        return $this->showLoginForm();
+        
+        return $this->showLogin();
     }
 
     private function handleLoginSubmit()
@@ -30,24 +48,22 @@ class AuthController
 
         // Validation
         if (empty($username) || empty($password)) {
-            setFlashMessage('error', 'Username dan password harus diisi.');
-            return $this->showLoginForm();
+            $this->flashMessage('error', 'Username dan password harus diisi.');
+            return $this->showLogin();
         }
-
+        
         // Rate limiting (simple)
         if (!$this->checkRateLimit()) {
-            setFlashMessage('error', 'Terlalu banyak percobaan login. Silakan coba lagi dalam beberapa menit.');
-            return $this->showLoginForm();
-        }
-
-        try {
+            $this->flashMessage('error', 'Terlalu banyak percobaan login. Silakan coba lagi dalam beberapa menit.');
+            return $this->showLogin();
+        }        try {
             $user = $this->userModel->authenticate($username, $password);
 
             if ($user) {
                 // Check if user is active
                 if ($user['status'] != 1) {
-                    setFlashMessage('error', 'Akun Anda tidak aktif. Silakan hubungi administrator.');
-                    return $this->showLoginForm();
+                    $this->flashMessage('error', 'Akun Anda tidak aktif. Silakan hubungi administrator.');
+                    return $this->showLogin();
                 }
 
                 // Create session
@@ -57,21 +73,21 @@ class AuthController
                 $this->logLoginActivity($user['id'], true);
 
                 // Redirect based on role or intended page
-                $redirect_url = $_SESSION['intended_url'] ?? '/dashboard.php';
+                $redirect_url = $_SESSION['intended_url'] ?? '/dashboard';
                 unset($_SESSION['intended_url']);
 
-                redirect($redirect_url);
+                $this->redirect($redirect_url);
             } else {
                 // Log failed login attempt
                 $this->logLoginActivity(null, false, $username);
 
-                setFlashMessage('error', 'Username atau password salah.');
-                return $this->showLoginForm();
+                $this->flashMessage('error', 'Username atau password salah.');
+                return $this->showLogin();
             }
         } catch (Exception $e) {
             error_log("Login error: " . $e->getMessage());
-            setFlashMessage('error', 'Terjadi kesalahan sistem. Silakan coba lagi.');
-            return $this->showLoginForm();
+            $this->flashMessage('error', 'Terjadi kesalahan sistem. Silakan coba lagi.');
+            return $this->showLogin();
         }
     }
 
@@ -156,12 +172,7 @@ class AuthController
             );
         }
 
-        setFlashMessage('success', 'Anda telah berhasil logout.');
-        redirect('/login.php');
-    }
-
-    private function showLoginForm()
-    {
-        include APP_PATH . '/views/auth/login.php';
+        $this->flashMessage('success', 'Anda telah berhasil logout.');
+        $this->redirect('/login');
     }
 }

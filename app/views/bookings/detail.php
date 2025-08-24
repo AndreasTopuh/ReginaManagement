@@ -10,7 +10,7 @@ include INCLUDES_PATH . '/header.php';
                 <h1><i class="fas fa-eye"></i> Booking Details</h1>
                 <p class="text-muted mb-0">Booking Code: <strong><?= htmlspecialchars($booking['booking_code']) ?></strong></p>
             </div>
-            <a href="<?= BASE_URL ?>/bookings.php" class="btn btn-outline-secondary">
+            <a href="<?= BASE_URL ?>/bookings" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Bookings
             </a>
         </div>

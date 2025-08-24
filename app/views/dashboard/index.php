@@ -170,7 +170,7 @@ include INCLUDES_PATH . '/header.php';
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5><i class="fas fa-clock"></i> Recent Bookings</h5>
-                <a href="<?= BASE_URL ?>/bookings.php" class="btn btn-sm btn-outline-primary">View All</a>
+                <a href="<?= BASE_URL ?>/bookings" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body">
                 <?php if (empty($recent_bookings)): ?>
@@ -196,7 +196,7 @@ include INCLUDES_PATH . '/header.php';
                                 <?php foreach ($recent_bookings as $booking): ?>
                                     <tr>
                                         <td>
-                                            <a href="<?= BASE_URL ?>/bookings_detail.php?id=<?= $booking['id'] ?>"
+                                            <a href="<?= BASE_URL ?>/bookings/<?= $booking['id'] ?>"
                                                 class="text-decoration-none">
                                                 <?= htmlspecialchars($booking['booking_code']) ?>
                                             </a>

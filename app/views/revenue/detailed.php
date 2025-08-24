@@ -8,10 +8,10 @@ include INCLUDES_PATH . '/header.php';
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-list"></i> Detailed Revenue Report</h1>
             <div class="btn-group">
-                <a href="<?= BASE_URL ?>/revenue.php" class="btn btn-outline-secondary">
+                <a href="<?= BASE_URL ?>/revenue" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Back to Summary
                 </a>
-                <a href="<?= BASE_URL ?>/revenue.php?action=export&format=csv&type=detailed&date_from=<?= $date_from ?>&date_to=<?= $date_to ?><?= !empty($status) ? '&status=' . $status : '' ?><?= !empty($room_type) ? '&room_type=' . $room_type : '' ?>" class="btn btn-outline-success">
+                <a href="<?= BASE_URL ?>/revenue?action=export&format=csv&type=detailed&date_from=<?= $date_from ?>&date_to=<?= $date_to ?><?= !empty($status) ? '&status=' . $status : '' ?><?= !empty($room_type) ? '&room_type=' . $room_type : '' ?>" class="btn btn-outline-success">
                     <i class="fas fa-download"></i> Export CSV
                 </a>
             </div>

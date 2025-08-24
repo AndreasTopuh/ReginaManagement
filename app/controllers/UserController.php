@@ -1,10 +1,11 @@
 <?php
-class UserController
+class UserController extends BaseController
 {
     private $userModel;
 
     public function __construct()
     {
+        parent::__construct();
         $this->userModel = new User();
     }
 
@@ -118,38 +119,98 @@ class UserController
 
     public function toggleStatus($user_id)
     {
-        requireLogin();
+        $this->requireLogin();
+        $this->requireRole(['Owner', 'Admin']);
 
-        // Check if user is Owner or Admin
-        if (!in_array(SessionManager::getUserRole(), ['Owner', 'Admin'])) {
-            $_SESSION['error'] = "Access denied. Only Owner and Admin can manage users.";
-            header('Location: ' . BASE_URL . '/dashboard.php');
-            exit;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $user = $this->userModel->findById($user_id);
+                if (!$user) {
+                    $this->flashMessage('error', 'User tidak ditemukan.');
+                    $this->redirect('/users');
+                }
+
+                $new_status = $user['status'] ? 0 : 1;
+                $this->userModel->updateStatus($user_id, $new_status);
+
+                $status_text = $new_status ? 'aktif' : 'nonaktif';
+                $this->flashMessage('success', "Status user berhasil diubah menjadi $status_text.");
+            } catch (Exception $e) {
+                error_log("Toggle status error: " . $e->getMessage());
+                $this->flashMessage('error', 'Gagal mengubah status user.');
+            }
         }
 
-        // Prevent toggling own account
-        if ($user_id == $_SESSION['user_id']) {
-            $_SESSION['error'] = "You cannot deactivate your own account.";
-            header('Location: ' . BASE_URL . '/users.php');
-            exit;
+        $this->redirect('/users');
+    }
+
+    public function profile()
+    {
+        $this->requireLogin();
+        
+        $user = $this->userModel->findById($_SESSION['user_id']);
+        if (!$user) {
+            $this->flashMessage('error', 'Profile tidak ditemukan.');
+            $this->redirect('/dashboard');
         }
 
-        // Prevent non-owners from toggling owners
-        $target_user = $this->userModel->getUserById($user_id);
-        if ($target_user['role_name'] === 'Owner' && SessionManager::getUserRole() !== 'Owner') {
-            $_SESSION['error'] = "Only Owner can activate/deactivate other Owner accounts.";
-            header('Location: ' . BASE_URL . '/users.php');
-            exit;
+        $this->render('users/profile', [
+            'title' => 'My Profile - Regina Hotel',
+            'user' => $user
+        ]);
+    }
+
+    public function updateProfile()
+    {
+        $this->requireLogin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/profile');
         }
 
-        if ($this->userModel->toggleUserStatus($user_id)) {
-            $_SESSION['success'] = "User status updated successfully.";
-        } else {
-            $_SESSION['error'] = "Failed to update user status.";
+        try {
+            $user_id = $_SESSION['user_id'];
+            $data = [
+                'name' => trim($_POST['name'] ?? ''),
+                'username' => trim($_POST['username'] ?? ''),
+                'current_password' => $_POST['current_password'] ?? '',
+                'new_password' => $_POST['new_password'] ?? '',
+                'confirm_password' => $_POST['confirm_password'] ?? ''
+            ];
+
+            // Validate input
+            $errors = $this->validateProfileInput($data, $user_id);
+            if (!empty($errors)) {
+                foreach ($errors as $error) {
+                    $this->flashMessage('error', $error);
+                }
+                $this->redirect('/profile');
+            }
+
+            // Update profile data
+            $update_data = [
+                'name' => $data['name'],
+                'username' => $data['username']
+            ];
+
+            // If password is being changed
+            if (!empty($data['new_password'])) {
+                $update_data['password'] = password_hash($data['new_password'], PASSWORD_DEFAULT);
+            }
+
+            $this->userModel->update($user_id, $update_data);
+            
+            // Update session data
+            $_SESSION['user_name'] = $data['name'];
+            $_SESSION['username'] = $data['username'];
+
+            $this->flashMessage('success', 'Profile berhasil diupdate.');
+        } catch (Exception $e) {
+            error_log("Profile update error: " . $e->getMessage());
+            $this->flashMessage('error', 'Gagal mengupdate profile.');
         }
 
-        header('Location: ' . BASE_URL . '/users.php');
-        exit;
+        $this->redirect('/profile');
     }
 
     private function handleCreateUser()
@@ -308,6 +369,54 @@ class UserController
                 $errors[] = "Confirm password is required.";
             } elseif ($data['password'] !== $data['confirm_password']) {
                 $errors[] = "Passwords do not match.";
+            }
+        }
+
+        return $errors;
+    }
+
+    private function validateProfileInput($data, $user_id)
+    {
+        $errors = [];
+
+        if (empty($data['name'])) {
+            $errors[] = "Name is required.";
+        }
+
+        if (empty($data['username'])) {
+            $errors[] = "Username is required.";
+        } elseif (strlen($data['username']) < 3) {
+            $errors[] = "Username must be at least 3 characters.";
+        } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $data['username'])) {
+            $errors[] = "Username can only contain letters, numbers, and underscores.";
+        } else {
+            // Check if username already exists (exclude current user)
+            $existing_user = $this->userModel->findByUsername($data['username']);
+            if ($existing_user && $existing_user['id'] != $user_id) {
+                $errors[] = "Username already exists.";
+            }
+        }
+
+        // Password validation (only if changing password)
+        if (!empty($data['new_password'])) {
+            // Verify current password
+            if (empty($data['current_password'])) {
+                $errors[] = "Current password is required to change password.";
+            } else {
+                $current_user = $this->userModel->findById($user_id);
+                if (!password_verify($data['current_password'], $current_user['password'])) {
+                    $errors[] = "Current password is incorrect.";
+                }
+            }
+
+            if (strlen($data['new_password']) < 6) {
+                $errors[] = "New password must be at least 6 characters.";
+            }
+
+            if (empty($data['confirm_password'])) {
+                $errors[] = "Confirm new password is required.";
+            } elseif ($data['new_password'] !== $data['confirm_password']) {
+                $errors[] = "New passwords do not match.";
             }
         }
 

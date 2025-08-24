@@ -11,7 +11,7 @@ unset($_SESSION['form_data']);
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-user-plus"></i> Add New User</h1>
-            <a href="<?= BASE_URL ?>/users.php" class="btn btn-secondary">
+            <a href="<?= BASE_URL ?>/users" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Users
             </a>
         </div>
@@ -33,7 +33,7 @@ endif; ?>
                 <h5><i class="fas fa-user-plus"></i> User Information</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="<?= BASE_URL ?>/users.php?action=create">
+                <form method="POST" action="<?= BASE_URL ?>/users">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -107,7 +107,7 @@ endif; ?>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="<?= BASE_URL ?>/users.php" class="btn btn-secondary">Cancel</a>
+                        <a href="<?= BASE_URL ?>/users" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Create User
                         </button>

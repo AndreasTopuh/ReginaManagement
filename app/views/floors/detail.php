@@ -8,10 +8,10 @@ include INCLUDES_PATH . '/header.php';
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-building"></i> Floor <?= $floor['floor_number'] ?> Details</h1>
             <div>
-                <a href="floors.php?action=edit&id=<?= $floor['id'] ?>" class="btn btn-warning">
+                <a href="<?= BASE_URL ?>/floors/<?= $floor['id'] ?>" class="btn btn-warning">
                     <i class="fas fa-edit"></i> Edit Floor
                 </a>
-                <a href="<?= BASE_URL ?>/floors.php" class="btn btn-outline-secondary">
+                <a href="<?= BASE_URL ?>/floors" class="btn btn-outline-secondary">
                     <i class="fas fa-arrow-left"></i> Back to Floors
                 </a>
             </div>
@@ -65,7 +65,7 @@ include INCLUDES_PATH . '/header.php';
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Rooms on Floor <?= $floor['floor_number'] ?></h5>
                 <?php if (hasPermission(['Owner', 'Admin'])): ?>
-                <a href="<?= BASE_URL ?>/rooms.php?action=add&floor_id=<?= $floor['id'] ?>" class="btn btn-sm btn-primary">
+                <a href="<?= BASE_URL ?>/rooms?action=add&floor_id=<?= $floor['id'] ?>" class="btn btn-sm btn-primary">
                     <i class="fas fa-plus"></i> Add Room
                 </a>
                 <?php endif; ?>
@@ -77,7 +77,7 @@ include INCLUDES_PATH . '/header.php';
                     <h5>No rooms on this floor</h5>
                     <p>This floor doesn't have any rooms yet.</p>
                     <?php if (hasPermission(['Owner', 'Admin'])): ?>
-                    <a href="<?= BASE_URL ?>/rooms.php?action=add&floor_id=<?= $floor['id'] ?>" class="btn btn-primary">
+                    <a href="<?= BASE_URL ?>/rooms?action=add&floor_id=<?= $floor['id'] ?>" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Add First Room
                     </a>
                     <?php endif; ?>
@@ -128,7 +128,7 @@ include INCLUDES_PATH . '/header.php';
                                 </td>
                                 <?php if (hasPermission(['Owner', 'Admin'])): ?>
                                 <td>
-                                    <a href="<?= BASE_URL ?>/rooms.php?action=edit&id=<?= $room['id'] ?>" 
+                                    <a href="<?= BASE_URL ?>/rooms?action=edit&id=<?= $room['id'] ?>" 
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-edit"></i>
                                     </a>

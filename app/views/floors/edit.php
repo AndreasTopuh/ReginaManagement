@@ -7,7 +7,7 @@ include INCLUDES_PATH . '/header.php';
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-edit"></i> Edit Floor <?= $floor['floor_number'] ?></h1>
-            <a href="<?= BASE_URL ?>/floors.php" class="btn btn-outline-secondary">
+            <a href="<?= BASE_URL ?>/floors" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Floors
             </a>
         </div>
@@ -43,7 +43,7 @@ include INCLUDES_PATH . '/header.php';
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Update Floor
                         </button>
-                        <a href="<?= BASE_URL ?>/floors.php" class="btn btn-outline-secondary">
+                        <a href="<?= BASE_URL ?>/floors" class="btn btn-outline-secondary">
                             <i class="fas fa-times"></i> Cancel
                         </a>
                     </div>

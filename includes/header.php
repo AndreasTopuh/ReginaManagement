@@ -16,7 +16,7 @@
         <!-- Navigation -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container-fluid">
-                <a class="navbar-brand" href="<?= BASE_URL ?>/dashboard.php">
+                <a class="navbar-brand" href="<?= BASE_URL ?>/dashboard">
                     <i class="fas fa-hotel"></i> Regina Hotel
                 </a>
 
@@ -27,40 +27,40 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : '' ?>"
-                                href="<?= BASE_URL ?>/dashboard.php">
+                            <a class="nav-link <?= $_SERVER['REQUEST_URI'] == '/reginahotel/public/dashboard' || $_SERVER['REQUEST_URI'] == '/reginahotel/public/' ? 'active' : '' ?>"
+                                href="<?= BASE_URL ?>/dashboard">
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'bookings.php' ? 'active' : '' ?>"
-                                href="<?= BASE_URL ?>/bookings.php">
+                            <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/bookings') !== false ? 'active' : '' ?>"
+                                href="<?= BASE_URL ?>/bookings">
                                 <i class="fas fa-calendar-check"></i> Bookings
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'rooms.php' ? 'active' : '' ?>"
-                                href="<?= BASE_URL ?>/rooms.php">
+                            <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/rooms') !== false ? 'active' : '' ?>"
+                                href="<?= BASE_URL ?>/rooms">
                                 <i class="fas fa-bed"></i> Rooms
                             </a>
                         </li>
 
                         <?php if (hasPermission(['Owner', 'Admin'])): ?>
                             <li class="nav-item">
-                                <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'floors.php' ? 'active' : '' ?>"
-                                    href="<?= BASE_URL ?>/floors.php">
+                                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/floors') !== false ? 'active' : '' ?>"
+                                    href="<?= BASE_URL ?>/floors">
                                     <i class="fas fa-building"></i> Floors
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'users.php' ? 'active' : '' ?>"
-                                    href="<?= BASE_URL ?>/users.php">
+                                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/users') !== false ? 'active' : '' ?>"
+                                    href="<?= BASE_URL ?>/users">
                                     <i class="fas fa-users"></i> Users
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'revenue.php' ? 'active' : '' ?>"
-                                    href="<?= BASE_URL ?>/revenue.php">
+                                <a class="nav-link <?= strpos($_SERVER['REQUEST_URI'], '/revenue') !== false ? 'active' : '' ?>"
+                                    href="<?= BASE_URL ?>/revenue">
                                     <i class="fas fa-chart-line"></i> Revenue
                                 </a>
                             </li>
@@ -73,13 +73,13 @@
                                 <i class="fas fa-user"></i> <?= $_SESSION['name'] ?>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>/profile.php">
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>/profile">
                                         <i class="fas fa-user-cog"></i> Profile
                                     </a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
-                                <li><a class="dropdown-item" href="<?= BASE_URL ?>/logout.php">
+                                <li><a class="dropdown-item" href="<?= BASE_URL ?>/logout">
                                         <i class="fas fa-sign-out-alt"></i> Logout
                                     </a></li>
                             </ul>

@@ -9,7 +9,7 @@ include INCLUDES_PATH . '/header.php';
             <h1><i class="fas fa-bed"></i> Rooms Management</h1>
 
             <?php if (hasPermission(['Owner', 'Admin'])): ?>
-                <a href="rooms.php?action=add" class="btn btn-primary">
+                <a href="<?= BASE_URL ?>/rooms/create" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Add Room
                 </a>
             <?php endif; ?>
@@ -34,7 +34,7 @@ include INCLUDES_PATH . '/header.php';
                     </div>
                     <div class="col-md-8 d-flex align-items-end">
                         <button type="submit" class="btn btn-outline-primary me-2">Filter</button>
-                        <a href="rooms.php" class="btn btn-outline-secondary">Reset</a>
+                        <a href="<?= BASE_URL ?>/rooms" class="btn btn-outline-secondary">Reset</a>
                     </div>
                 </form>
             </div>
@@ -56,7 +56,7 @@ include INCLUDES_PATH . '/header.php';
                         <h5>No rooms found</h5>
                         <p>No rooms match your current filter criteria.</p>
                         <?php if (hasPermission(['Owner', 'Admin'])): ?>
-                            <a href="rooms.php?action=add" class="btn btn-primary">Add First Room</a>
+                            <a href="<?= BASE_URL ?>/rooms/create" class="btn btn-primary">Add First Room</a>
                         <?php endif; ?>
                     </div>
                 <?php else: ?>
@@ -108,7 +108,7 @@ include INCLUDES_PATH . '/header.php';
                                         <?php if (hasPermission(['Owner', 'Admin'])): ?>
                                             <td>
                                                 <div class="btn-group btn-group-sm">
-                                                    <a href="rooms.php?action=edit&id=<?= $room['id'] ?>"
+                                                    <a href="<?= BASE_URL ?>/rooms/<?= $room['id'] ?>"
                                                         class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
