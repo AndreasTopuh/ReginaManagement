@@ -1,0 +1,189 @@
+<?php
+class Room
+{
+    private $db;
+
+    public function __construct()
+    {
+        $this->db = Database::getInstance();
+    }
+
+    public function getAll($status = null)
+    {
+        $sql = "SELECT r.*, rt.type_name, rt.price,
+                       f.floor_number
+                FROM rooms r 
+                JOIN room_types rt ON r.type_id = rt.id 
+                JOIN floors f ON r.floor_id = f.id";
+
+        $params = [];
+        if ($status) {
+            $sql .= " WHERE r.status = ?";
+            $params[] = $status;
+        }
+
+        $sql .= " ORDER BY r.room_number ASC";
+
+        return $this->db->fetchAll($sql, $params);
+    }
+
+    public function findById($id)
+    {
+        $sql = "SELECT r.*, rt.type_name, rt.price,
+                       f.floor_number
+                FROM rooms r 
+                JOIN room_types rt ON r.type_id = rt.id 
+                JOIN floors f ON r.floor_id = f.id 
+                WHERE r.id = ?";
+
+        return $this->db->fetchOne($sql, [$id]);
+    }
+
+    public function getAvailableRooms($checkin_date, $checkout_date)
+    {
+        $sql = "SELECT r.*, rt.type_name, rt.price,
+                       f.floor_number
+                FROM rooms r 
+                JOIN room_types rt ON r.type_id = rt.id 
+                JOIN floors f ON r.floor_id = f.id 
+                WHERE r.status IN ('Available', 'available', 'Clean') 
+                AND r.id NOT IN (
+                    SELECT DISTINCT br.room_id 
+                    FROM booking_rooms br 
+                    JOIN bookings b ON br.booking_id = b.id 
+                    WHERE b.status NOT IN ('CheckedOut', 'Cancelled') 
+                    AND (
+                        (DATE(b.checkin_date) < DATE(?) AND DATE(b.checkout_date) > DATE(?)) OR
+                        (DATE(b.checkin_date) >= DATE(?) AND DATE(b.checkin_date) < DATE(?)) OR
+                        (DATE(b.checkout_date) > DATE(?) AND DATE(b.checkout_date) <= DATE(?)) OR
+                        (DATE(b.checkin_date) <= DATE(?) AND DATE(b.checkout_date) >= DATE(?))
+                    )
+                )
+                ORDER BY rt.price ASC, r.room_number ASC";
+
+        $params = [
+            $checkin_date,
+            $checkin_date,  // Case 1: existing booking wraps around new booking
+            $checkin_date,
+            $checkout_date, // Case 2: existing checkin falls within new booking period  
+            $checkin_date,
+            $checkout_date, // Case 3: existing checkout falls within new booking period
+            $checkin_date,
+            $checkout_date  // Case 4: new booking wraps around existing booking
+        ];
+
+        return $this->db->fetchAll($sql, $params);
+    }
+    public function getAllAvailableRooms()
+    {
+        $sql = "SELECT r.*, rt.type_name, rt.price,
+                       f.floor_number
+                FROM rooms r 
+                JOIN room_types rt ON r.type_id = rt.id 
+                JOIN floors f ON r.floor_id = f.id 
+                WHERE r.status IN ('Available', 'available', 'Clean') 
+                ORDER BY rt.price ASC, r.room_number ASC";
+
+        return $this->db->fetchAll($sql);
+    }
+
+    public function create($data)
+    {
+        $sql = "INSERT INTO rooms (room_number, type_id, floor_id, description, features) 
+                VALUES (?, ?, ?, ?, ?)";
+
+        $params = [
+            $data['room_number'],
+            $data['type_id'],
+            $data['floor_id'],
+            $data['description'],
+            $data['features']
+        ];
+
+        $result = $this->db->execute($sql, $params);
+
+        // Update floor total_rooms
+        $this->updateFloorTotalRooms($data['floor_id']);
+
+        return $result;
+    }
+
+    public function update($id, $data)
+    {
+        $old_room = $this->findById($id);
+
+        $sql = "UPDATE rooms SET room_number = ?, type_id = ?, floor_id = ?, description = ?, features = ? 
+                WHERE id = ?";
+
+        $params = [
+            $data['room_number'],
+            $data['type_id'],
+            $data['floor_id'],
+            $data['description'],
+            $data['features'],
+            $id
+        ];
+
+        $result = $this->db->execute($sql, $params);
+
+        // Update floor total_rooms for both old and new floor
+        $this->updateFloorTotalRooms($old_room['floor_id']);
+        if ($old_room['floor_id'] != $data['floor_id']) {
+            $this->updateFloorTotalRooms($data['floor_id']);
+        }
+
+        return $result;
+    }
+
+    public function delete($id)
+    {
+        $room = $this->findById($id);
+
+        $sql = "DELETE FROM rooms WHERE id = ?";
+        $result = $this->db->execute($sql, [$id]);
+
+        // Update floor total_rooms
+        $this->updateFloorTotalRooms($room['floor_id']);
+
+        return $result;
+    }
+
+    public function updateStatus($id, $status)
+    {
+        $sql = "UPDATE rooms SET status = ? WHERE id = ?";
+        return $this->db->execute($sql, [$status, $id]);
+    }
+
+    public function getTypes()
+    {
+        $sql = "SELECT * FROM room_types ORDER BY price ASC";
+        return $this->db->fetchAll($sql);
+    }
+
+    public function getFloors()
+    {
+        $sql = "SELECT * FROM floors ORDER BY floor_number ASC";
+        return $this->db->fetchAll($sql);
+    }
+
+    public function getStatistics()
+    {
+        $sql = "SELECT 
+                    COUNT(*) as total_rooms,
+                    SUM(CASE WHEN status = 'Available' THEN 1 ELSE 0 END) as available_rooms,
+                    SUM(CASE WHEN status = 'Occupied' THEN 1 ELSE 0 END) as occupied_rooms,
+                    SUM(CASE WHEN status = 'OutOfService' THEN 1 ELSE 0 END) as out_of_service_rooms
+                FROM rooms";
+
+        return $this->db->fetchOne($sql);
+    }
+
+    private function updateFloorTotalRooms($floor_id)
+    {
+        $sql = "UPDATE floors SET total_rooms = (
+                    SELECT COUNT(*) FROM rooms WHERE floor_id = ?
+                ) WHERE id = ?";
+
+        $this->db->execute($sql, [$floor_id, $floor_id]);
+    }
+}
