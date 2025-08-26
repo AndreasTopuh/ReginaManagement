@@ -109,9 +109,41 @@ include INCLUDES_PATH . '/header.php';
                                             <td>
                                                 <div class="btn-group btn-group-sm">
                                                     <a href="<?= BASE_URL ?>/rooms/<?= $room['id'] ?>"
-                                                        class="btn btn-outline-primary" data-bs-toggle="tooltip" title="Edit">
+                                                        class="btn btn-outline-primary" data-bs-toggle="tooltip" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="<?= BASE_URL ?>/rooms/<?= $room['id'] ?>/edit"
+                                                        class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-outline-warning dropdown-toggle dropdown-toggle-split"
+                                                            data-bs-toggle="dropdown" aria-expanded="false" title="Change Status">
+                                                            <i class="fas fa-sync-alt"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <?php if ($room['status'] !== 'Available'): ?>
+                                                                <li>
+                                                                    <form method="POST" action="<?= BASE_URL ?>/rooms/<?= $room['id'] ?>/update-status" class="d-inline">
+                                                                        <input type="hidden" name="status" value="Available">
+                                                                        <button type="submit" class="dropdown-item" onclick="return confirm('Set room as Available?')">
+                                                                            <i class="fas fa-check text-success"></i> Set Available
+                                                                        </button>
+                                                                    </form>
+                                                                </li>
+                                                            <?php endif; ?>
+                                                            <?php if ($room['status'] !== 'OutOfService'): ?>
+                                                                <li>
+                                                                    <form method="POST" action="<?= BASE_URL ?>/rooms/<?= $room['id'] ?>/update-status" class="d-inline">
+                                                                        <input type="hidden" name="status" value="OutOfService">
+                                                                        <button type="submit" class="dropdown-item" onclick="return confirm('Set room for Maintenance/Out of Service?')">
+                                                                            <i class="fas fa-tools text-danger"></i> Set Maintenance
+                                                                        </button>
+                                                                    </form>
+                                                                </li>
+                                                            <?php endif; ?>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </td>
                                         <?php endif; ?>

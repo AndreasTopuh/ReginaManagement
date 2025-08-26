@@ -104,7 +104,7 @@ class Room
     {
         $old_room = $this->findById($id);
 
-        $sql = "UPDATE rooms SET room_number = ?, type_id = ?, floor_id = ?, description = ?, features = ? 
+        $sql = "UPDATE rooms SET room_number = ?, type_id = ?, floor_id = ?, description = ?, features = ?, status = ? 
                 WHERE id = ?";
 
         $params = [
@@ -113,6 +113,7 @@ class Room
             $data['floor_id'],
             $data['description'],
             $data['features'],
+            $data['status'] ?? 'Available',
             $id
         ];
 

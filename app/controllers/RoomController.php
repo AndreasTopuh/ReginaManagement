@@ -137,11 +137,29 @@ class RoomController extends BaseController
             'type_id' => (int) $_POST['type_id'],
             'floor_id' => (int) $_POST['floor_id'],
             'description' => trim($_POST['description']),
-            'features' => trim($_POST['features'])
+            'features' => trim($_POST['features']),
+            'status' => trim($_POST['status'] ?? 'Available')
         ];
+
+        // Validation
+        if (empty($data['room_number'])) {
+            $this->flashMessage('error', 'Nomor kamar harus diisi.');
+            return $this->showEditForm($id);
+        }
+
+        if (empty($data['status'])) {
+            $this->flashMessage('error', 'Status kamar harus dipilih.');
+            return $this->showEditForm($id);
+        }
 
         try {
             $this->roomModel->update($id, $data);
+
+            // Also update status separately if needed
+            if (isset($_POST['status'])) {
+                $this->roomModel->updateStatus($id, $data['status']);
+            }
+
             $this->flashMessage('success', 'Kamar berhasil diupdate.');
             $this->redirect('/rooms');
         } catch (Exception $e) {
@@ -151,6 +169,49 @@ class RoomController extends BaseController
                 $this->flashMessage('error', 'Gagal mengupdate kamar: ' . $e->getMessage());
             }
             return $this->showEditForm($id);
+        }
+    }
+
+    public function updateStatus($id)
+    {
+        $this->requireRole(['Owner', 'Admin']);
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->flashMessage('error', 'Method tidak diizinkan.');
+            $this->redirect('/rooms');
+            return;
+        }
+
+        $status = trim($_POST['status'] ?? '');
+        $allowed_statuses = ['Available', 'Occupied', 'OutOfService'];
+
+        if (!in_array($status, $allowed_statuses)) {
+            $this->flashMessage('error', 'Status tidak valid.');
+            $this->redirect('/rooms');
+            return;
+        }
+
+        try {
+            $room = $this->roomModel->findById($id);
+            if (!$room) {
+                $this->flashMessage('error', 'Kamar tidak ditemukan.');
+                $this->redirect('/rooms');
+                return;
+            }
+
+            $this->roomModel->updateStatus($id, $status);
+
+            $status_labels = [
+                'Available' => 'Tersedia',
+                'Occupied' => 'Terisi',
+                'OutOfService' => 'Maintenance/Out of Service'
+            ];
+
+            $this->flashMessage('success', "Status kamar {$room['room_number']} berhasil diubah menjadi {$status_labels[$status]}.");
+            $this->redirect('/rooms');
+        } catch (Exception $e) {
+            $this->flashMessage('error', 'Gagal mengupdate status kamar: ' . $e->getMessage());
+            $this->redirect('/rooms');
         }
     }
 

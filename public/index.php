@@ -72,6 +72,7 @@ $router->get('/rooms/{id}', 'RoomController@show');
 $router->get('/rooms/{id}/edit', 'RoomController@edit');
 $router->post('/rooms/{id}/edit', 'RoomController@edit');
 $router->post('/rooms/{id}', 'RoomController@update');
+$router->post('/rooms/{id}/update-status', 'RoomController@updateStatus');
 $router->post('/rooms/{id}/delete', 'RoomController@delete');
 
 // === FLOOR ROUTES ===
