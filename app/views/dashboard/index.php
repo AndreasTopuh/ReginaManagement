@@ -110,7 +110,7 @@ include INCLUDES_PATH . '/header.php';
 </div>
 
 <!-- Overall Rating Card (Additional metric) -->
-<div class="row g-3 mb-4">
+<!-- <div class="row g-3 mb-4">
     <div class="col-xl-3 col-md-6">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
@@ -139,7 +139,7 @@ include INCLUDES_PATH . '/header.php';
             </div>
         </div>
     </div>
-</div>
+</div> -->
 <!-- Charts and Analytics Row -->
 <div class="row g-3 mb-4">
     <!-- Reservation By Months Chart -->
@@ -303,7 +303,7 @@ include INCLUDES_PATH . '/header.php';
 <!-- Booking List and Tasks Row -->
 <div class="row g-3">
     <!-- Booking List -->
-    <div class="col-xl-8">
+    <div class="col-xl-12">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">Booking List</h6>
@@ -387,7 +387,7 @@ include INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Tasks Section -->
-    <div class="col-xl-4">
+    <!-- <div class="col-xl-4">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">Task</h6>
@@ -396,7 +396,7 @@ include INCLUDES_PATH . '/header.php';
                 </button>
             </div>
             <div class="card-body">
-                <!-- Sample Tasks -->
+                Sample Tasks
                 <div class="task-item mb-3 p-3 bg-light rounded">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
@@ -432,7 +432,7 @@ include INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
 
 <style>
