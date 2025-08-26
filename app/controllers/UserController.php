@@ -16,7 +16,7 @@ class UserController extends BaseController
         // Check if user is Owner or Admin
         if (!in_array(SessionManager::getUserRole(), ['Owner', 'Admin'])) {
             $_SESSION['error'] = "Access denied. Only Owner and Admin can manage users.";
-            header('Location: ' . BASE_URL . '/dashboard.php');
+            header('Location: ' . BASE_URL . '/dashboard');
             exit;
         }
 
@@ -31,7 +31,7 @@ class UserController extends BaseController
         // Check if user is Owner or Admin
         if (!in_array(SessionManager::getUserRole(), ['Owner', 'Admin'])) {
             $_SESSION['error'] = "Access denied. Only Owner and Admin can manage users.";
-            header('Location: ' . BASE_URL . '/dashboard.php');
+            header('Location: ' . BASE_URL . '/dashboard');
             exit;
         }
 
@@ -49,7 +49,7 @@ class UserController extends BaseController
         // Check if user is Owner or Admin
         if (!in_array(SessionManager::getUserRole(), ['Owner', 'Admin'])) {
             $_SESSION['error'] = "Access denied. Only Owner and Admin can manage users.";
-            header('Location: ' . BASE_URL . '/dashboard.php');
+            header('Location: ' . BASE_URL . '/dashboard');
             exit;
         }
 
@@ -57,13 +57,13 @@ class UserController extends BaseController
         $target_user = $this->userModel->getUserById($user_id);
         if (!$target_user) {
             $_SESSION['error'] = "User not found.";
-            header('Location: ' . BASE_URL . '/users.php');
+            header('Location: ' . BASE_URL . '/users');
             exit;
         }
 
         if ($target_user['role_name'] === 'Owner' && SessionManager::getUserRole() !== 'Owner') {
             $_SESSION['error'] = "Only Owner can edit other Owner accounts.";
-            header('Location: ' . BASE_URL . '/users.php');
+            header('Location: ' . BASE_URL . '/users');
             exit;
         }
 
@@ -82,14 +82,21 @@ class UserController extends BaseController
         // Check if user is Owner or Admin
         if (!in_array(SessionManager::getUserRole(), ['Owner', 'Admin'])) {
             $_SESSION['error'] = "Access denied. Only Owner and Admin can manage users.";
-            header('Location: ' . BASE_URL . '/dashboard.php');
+            header('Location: ' . BASE_URL . '/dashboard');
+            exit;
+        }
+
+        // Only handle POST requests for delete
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['error'] = "Invalid request method.";
+            header('Location: ' . BASE_URL . '/users');
             exit;
         }
 
         // Prevent deletion of own account
         if ($user_id == $_SESSION['user_id']) {
             $_SESSION['error'] = "You cannot delete your own account.";
-            header('Location: ' . BASE_URL . '/users.php');
+            header('Location: ' . BASE_URL . '/users');
             exit;
         }
 
@@ -97,13 +104,13 @@ class UserController extends BaseController
         $target_user = $this->userModel->getUserById($user_id);
         if (!$target_user) {
             $_SESSION['error'] = "User not found.";
-            header('Location: ' . BASE_URL . '/users.php');
+            header('Location: ' . BASE_URL . '/users');
             exit;
         }
 
         if ($target_user['role_name'] === 'Owner' && SessionManager::getUserRole() !== 'Owner') {
             $_SESSION['error'] = "Only Owner can delete other Owner accounts.";
-            header('Location: ' . BASE_URL . '/users.php');
+            header('Location: ' . BASE_URL . '/users');
             exit;
         }
 
@@ -113,59 +120,87 @@ class UserController extends BaseController
             $_SESSION['error'] = "Failed to delete user.";
         }
 
-        header('Location: ' . BASE_URL . '/users.php');
+        header('Location: ' . BASE_URL . '/users');
         exit;
     }
 
     public function toggleStatus($user_id)
     {
-        $this->requireLogin();
-        $this->requireRole(['Owner', 'Admin']);
+        requireLogin();
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
-                $user = $this->userModel->findById($user_id);
-                if (!$user) {
-                    $this->flashMessage('error', 'User tidak ditemukan.');
-                    $this->redirect('/users');
-                }
-
-                $new_status = $user['status'] ? 0 : 1;
-                $this->userModel->updateStatus($user_id, $new_status);
-
-                $status_text = $new_status ? 'aktif' : 'nonaktif';
-                $this->flashMessage('success', "Status user berhasil diubah menjadi $status_text.");
-            } catch (Exception $e) {
-                error_log("Toggle status error: " . $e->getMessage());
-                $this->flashMessage('error', 'Gagal mengubah status user.');
-            }
+        // Check if user is Owner or Admin
+        if (!in_array(SessionManager::getUserRole(), ['Owner', 'Admin'])) {
+            $_SESSION['error'] = "Access denied. Only Owner and Admin can manage users.";
+            header('Location: ' . BASE_URL . '/dashboard');
+            exit;
         }
 
-        $this->redirect('/users');
+        // Only handle POST requests
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['error'] = "Invalid request method.";
+            header('Location: ' . BASE_URL . '/users');
+            exit;
+        }
+
+        try {
+            $user = $this->userModel->getUserById($user_id);
+            if (!$user) {
+                $_SESSION['error'] = 'User not found.';
+                header('Location: ' . BASE_URL . '/users');
+                exit;
+            }
+
+            // Prevent modifying own account status
+            if ($user_id == $_SESSION['user_id']) {
+                $_SESSION['error'] = "You cannot change your own account status.";
+                header('Location: ' . BASE_URL . '/users');
+                exit;
+            }
+
+            // Prevent non-owners from modifying owner status
+            if ($user['role_name'] === 'Owner' && SessionManager::getUserRole() !== 'Owner') {
+                $_SESSION['error'] = "Only Owner can modify other Owner account status.";
+                header('Location: ' . BASE_URL . '/users');
+                exit;
+            }
+
+            $new_status = $user['status'] ? 0 : 1;
+            if ($this->userModel->updateStatus($user_id, $new_status)) {
+                $status_text = $new_status ? 'activated' : 'deactivated';
+                $_SESSION['success'] = "User successfully $status_text.";
+            } else {
+                $_SESSION['error'] = 'Failed to update user status.';
+            }
+        } catch (Exception $e) {
+            error_log("Toggle status error: " . $e->getMessage());
+            $_SESSION['error'] = 'Failed to update user status.';
+        }
+
+        header('Location: ' . BASE_URL . '/users');
+        exit;
     }
 
     public function profile()
     {
-        $this->requireLogin();
-        
-        $user = $this->userModel->findById($_SESSION['user_id']);
+        requireLogin();
+
+        $user = $this->userModel->getUserById($_SESSION['user_id']);
         if (!$user) {
-            $this->flashMessage('error', 'Profile tidak ditemukan.');
-            $this->redirect('/dashboard');
+            $_SESSION['error'] = 'Profile not found.';
+            header('Location: ' . BASE_URL . '/dashboard');
+            exit;
         }
 
-        $this->render('users/profile', [
-            'title' => 'My Profile - Regina Hotel',
-            'user' => $user
-        ]);
+        include APP_PATH . '/views/users/profile.php';
     }
 
     public function updateProfile()
     {
-        $this->requireLogin();
-        
+        requireLogin();
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->redirect('/profile');
+            header('Location: ' . BASE_URL . '/profile');
+            exit;
         }
 
         try {
@@ -181,10 +216,9 @@ class UserController extends BaseController
             // Validate input
             $errors = $this->validateProfileInput($data, $user_id);
             if (!empty($errors)) {
-                foreach ($errors as $error) {
-                    $this->flashMessage('error', $error);
-                }
-                $this->redirect('/profile');
+                $_SESSION['error'] = implode('<br>', $errors);
+                header('Location: ' . BASE_URL . '/profile');
+                exit;
             }
 
             // Update profile data
@@ -198,19 +232,22 @@ class UserController extends BaseController
                 $update_data['password'] = password_hash($data['new_password'], PASSWORD_DEFAULT);
             }
 
-            $this->userModel->update($user_id, $update_data);
-            
-            // Update session data
-            $_SESSION['user_name'] = $data['name'];
-            $_SESSION['username'] = $data['username'];
+            if ($this->userModel->update($user_id, $update_data)) {
+                // Update session data
+                $_SESSION['user_name'] = $data['name'];
+                $_SESSION['username'] = $data['username'];
 
-            $this->flashMessage('success', 'Profile berhasil diupdate.');
+                $_SESSION['success'] = 'Profile updated successfully.';
+            } else {
+                $_SESSION['error'] = 'Failed to update profile.';
+            }
         } catch (Exception $e) {
             error_log("Profile update error: " . $e->getMessage());
-            $this->flashMessage('error', 'Gagal mengupdate profile.');
+            $_SESSION['error'] = 'Failed to update profile.';
         }
 
-        $this->redirect('/profile');
+        header('Location: ' . BASE_URL . '/profile');
+        exit;
     }
 
     private function handleCreateUser()
@@ -247,22 +284,22 @@ class UserController extends BaseController
             if (!empty($errors)) {
                 $_SESSION['error'] = implode('<br>', $errors);
                 $_SESSION['form_data'] = $data;
-                header('Location: ' . BASE_URL . '/users.php?action=create');
+                header('Location: ' . BASE_URL . '/users/create');
                 exit;
             }
 
             if ($this->userModel->createUser($data)) {
                 $_SESSION['success'] = "User created successfully.";
-                header('Location: ' . BASE_URL . '/users.php');
+                header('Location: ' . BASE_URL . '/users');
             } else {
                 $_SESSION['error'] = "Failed to create user.";
                 $_SESSION['form_data'] = $data;
-                header('Location: ' . BASE_URL . '/users.php?action=create');
+                header('Location: ' . BASE_URL . '/users/create');
             }
         } catch (Exception $e) {
             $_SESSION['error'] = "Error: " . $e->getMessage();
             $_SESSION['form_data'] = $_POST;
-            header('Location: ' . BASE_URL . '/users.php?action=create');
+            header('Location: ' . BASE_URL . '/users/create');
         }
         exit;
     }
@@ -309,22 +346,22 @@ class UserController extends BaseController
             if (!empty($errors)) {
                 $_SESSION['error'] = implode('<br>', $errors);
                 $_SESSION['form_data'] = $data;
-                header('Location: ' . BASE_URL . '/users.php?action=edit&id=' . $user_id);
+                header('Location: ' . BASE_URL . '/users/' . $user_id . '/edit');
                 exit;
             }
 
             if ($this->userModel->updateUser($data)) {
                 $_SESSION['success'] = "User updated successfully.";
-                header('Location: ' . BASE_URL . '/users.php');
+                header('Location: ' . BASE_URL . '/users');
             } else {
                 $_SESSION['error'] = "Failed to update user.";
                 $_SESSION['form_data'] = $data;
-                header('Location: ' . BASE_URL . '/users.php?action=edit&id=' . $user_id);
+                header('Location: ' . BASE_URL . '/users/' . $user_id . '/edit');
             }
         } catch (Exception $e) {
             $_SESSION['error'] = "Error: " . $e->getMessage();
             $_SESSION['form_data'] = $_POST;
-            header('Location: ' . BASE_URL . '/users.php?action=edit&id=' . $user_id);
+            header('Location: ' . BASE_URL . '/users/' . $user_id . '/edit');
         }
         exit;
     }
@@ -391,7 +428,7 @@ class UserController extends BaseController
             $errors[] = "Username can only contain letters, numbers, and underscores.";
         } else {
             // Check if username already exists (exclude current user)
-            $existing_user = $this->userModel->findByUsername($data['username']);
+            $existing_user = $this->userModel->getUserByUsername($data['username']);
             if ($existing_user && $existing_user['id'] != $user_id) {
                 $errors[] = "Username already exists.";
             }
@@ -403,7 +440,7 @@ class UserController extends BaseController
             if (empty($data['current_password'])) {
                 $errors[] = "Current password is required to change password.";
             } else {
-                $current_user = $this->userModel->findById($user_id);
+                $current_user = $this->userModel->getUserById($user_id);
                 if (!password_verify($data['current_password'], $current_user['password'])) {
                     $errors[] = "Current password is incorrect.";
                 }

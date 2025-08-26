@@ -250,14 +250,50 @@ include INCLUDES_PATH . '/header.php';
             </div>
             <div class="card-body">
                 <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-info"></div>
-                        <div class="timeline-content">
-                            <h6 class="timeline-title">Booking Created</h6>
-                            <p class="timeline-text">Created by <?= htmlspecialchars($booking['created_by_name']) ?></p>
-                            <span class="timeline-date"><?= formatDateTime($booking['created_at']) ?></span>
+                    <?php if (!empty($booking_history)): ?>
+                        <?php foreach ($booking_history as $history): ?>
+                            <?php
+                            $icon_class = [
+                                'created' => 'info',
+                                'checked_in' => 'success',
+                                'checked_out' => 'primary',
+                                'canceled' => 'danger',
+                                'updated' => 'warning'
+                            ];
+
+                            $action_titles = [
+                                'created' => 'Booking Created',
+                                'checked_in' => 'Check-In',
+                                'checked_out' => 'Check-Out',
+                                'canceled' => 'Booking Canceled',
+                                'updated' => 'Booking Updated'
+                            ];
+                            ?>
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-<?= $icon_class[$history['action_type']] ?? 'secondary' ?>"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title"><?= $action_titles[$history['action_type']] ?? ucfirst($history['action_type']) ?></h6>
+                                    <p class="timeline-text">
+                                        <?= htmlspecialchars($history['action_description'] ?? '') ?>
+                                        <?php if ($history['action_by_name']): ?>
+                                            - by <?= htmlspecialchars($history['action_by_name']) ?>
+                                        <?php endif; ?>
+                                    </p>
+                                    <span class="timeline-date"><?= formatDateTime($history['action_at']) ?></span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <!-- Fallback to original booking created entry if no history found -->
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Booking Created</h6>
+                                <p class="timeline-text">Created by <?= htmlspecialchars($booking['created_by_name']) ?></p>
+                                <span class="timeline-date"><?= formatDateTime($booking['created_at']) ?></span>
+                            </div>
                         </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

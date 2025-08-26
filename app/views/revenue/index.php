@@ -353,77 +353,127 @@ include INCLUDES_PATH . '/header.php';
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Debug: Log the data to console
+    console.log('Revenue Data:', <?= json_encode($revenue_by_period) ?>);
+    console.log('Revenue Summary:', <?= json_encode($revenue_summary) ?>);
+
     // Revenue Trend Chart
     const revenueCtx = document.getElementById('revenueChart').getContext('2d');
     const revenueData = <?= json_encode($revenue_by_period) ?>;
 
-    new Chart(revenueCtx, {
-        type: 'line',
-        data: {
-            labels: revenueData.map(item => item.period),
-            datasets: [{
-                label: 'Revenue',
-                data: revenueData.map(item => parseFloat(item.total_revenue)),
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.1
-            }, {
-                label: 'Bookings',
-                data: revenueData.map(item => parseInt(item.total_bookings)),
-                borderColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                yAxisID: 'y1',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
+    // Ensure we have data for the chart
+    if (revenueData && revenueData.length > 0) {
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: revenueData.map(item => item.period),
+                datasets: [{
+                    label: 'Revenue (Rp)',
+                    data: revenueData.map(item => parseFloat(item.total_revenue)),
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }, {
+                    label: 'Bookings',
+                    data: revenueData.map(item => parseInt(item.total_bookings)),
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    yAxisID: 'y1',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
                 },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    grid: {
-                        drawOnChartArea: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Revenue (Rp)'
+                        }
                     },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Number of Bookings'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Revenue and Bookings Trend'
+                    }
                 }
             }
-        }
-    });
+        });
+    } else {
+        // Show message when no data
+        revenueCtx.canvas.parentNode.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-chart-line fa-3x mb-3"></i><p>No revenue data available for this period</p></div>';
+    }
 
     // Status Chart
     const statusCtx = document.getElementById('statusChart').getContext('2d');
     const statusData = <?= json_encode($revenue_summary) ?>;
 
-    new Chart(statusCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Completed', 'Active', 'Pending', 'Cancelled'],
-            datasets: [{
-                data: [
-                    parseInt(statusData.completed_bookings || 0),
-                    parseInt(statusData.active_bookings || 0),
-                    parseInt(statusData.pending_bookings || 0),
-                    parseInt(statusData.cancelled_bookings || 0)
-                ],
-                backgroundColor: [
-                    '#28a745',
-                    '#007bff',
-                    '#ffc107',
-                    '#dc3545'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
+    // Prepare data for status chart
+    const statusChartData = [
+        parseInt(statusData.completed_bookings || 0),
+        parseInt(statusData.active_bookings || 0),
+        parseInt(statusData.pending_bookings || 0),
+        parseInt(statusData.cancelled_bookings || 0)
+    ];
+
+    const totalBookings = statusChartData.reduce((a, b) => a + b, 0);
+
+    if (totalBookings > 0) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Active', 'Pending', 'Cancelled'],
+                datasets: [{
+                    data: statusChartData,
+                    backgroundColor: [
+                        '#28a745',
+                        '#007bff',
+                        '#ffc107',
+                        '#dc3545'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Booking Status Distribution'
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    } else {
+        // Show message when no data
+        statusCtx.canvas.parentNode.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-pie-chart fa-3x mb-3"></i><p>No booking status data available</p></div>';
+    }
 
     // Monthly Chart
     <?php if (!empty($revenue_by_month)): ?>
@@ -435,7 +485,7 @@ include INCLUDES_PATH . '/header.php';
             data: {
                 labels: monthlyData.map(item => item.month_name + ' ' + item.year),
                 datasets: [{
-                    label: 'Monthly Revenue',
+                    label: 'Monthly Revenue (Rp)',
                     data: monthlyData.map(item => parseFloat(item.total_revenue)),
                     backgroundColor: 'rgba(54, 162, 235, 0.8)',
                     borderColor: 'rgba(54, 162, 235, 1)',
@@ -446,11 +496,29 @@ include INCLUDES_PATH . '/header.php';
                 responsive: true,
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Revenue (Rp)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Monthly Revenue Trend (Last 12 Months)'
                     }
                 }
             }
         });
+    <?php else: ?>
+        document.getElementById('monthlyChart').parentNode.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-chart-bar fa-3x mb-3"></i><p>No monthly revenue data available</p></div>';
     <?php endif; ?>
 </script>
 

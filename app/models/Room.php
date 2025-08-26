@@ -46,30 +46,22 @@ class Room
                 FROM rooms r 
                 JOIN room_types rt ON r.type_id = rt.id 
                 JOIN floors f ON r.floor_id = f.id 
-                WHERE r.status IN ('Available', 'available', 'Clean') 
+                WHERE r.status IN ('Available', 'Clean') 
                 AND r.id NOT IN (
                     SELECT DISTINCT br.room_id 
                     FROM booking_rooms br 
                     JOIN bookings b ON br.booking_id = b.id 
-                    WHERE b.status NOT IN ('CheckedOut', 'Cancelled') 
-                    AND (
-                        (DATE(b.checkin_date) < DATE(?) AND DATE(b.checkout_date) > DATE(?)) OR
-                        (DATE(b.checkin_date) >= DATE(?) AND DATE(b.checkin_date) < DATE(?)) OR
-                        (DATE(b.checkout_date) > DATE(?) AND DATE(b.checkout_date) <= DATE(?)) OR
-                        (DATE(b.checkin_date) <= DATE(?) AND DATE(b.checkout_date) >= DATE(?))
+                    WHERE b.status NOT IN ('CheckedOut', 'Canceled') 
+                    AND NOT (
+                        -- No overlap conditions: new checkout <= existing checkin OR new checkin >= existing checkout
+                        DATE(?) <= DATE(b.checkin_date) OR DATE(?) >= DATE(b.checkout_date)
                     )
                 )
                 ORDER BY rt.price ASC, r.room_number ASC";
 
         $params = [
-            $checkin_date,
-            $checkin_date,  // Case 1: existing booking wraps around new booking
-            $checkin_date,
-            $checkout_date, // Case 2: existing checkin falls within new booking period  
-            $checkin_date,
-            $checkout_date, // Case 3: existing checkout falls within new booking period
-            $checkin_date,
-            $checkout_date  // Case 4: new booking wraps around existing booking
+            $checkout_date, // new checkout date
+            $checkin_date   // new checkin date
         ];
 
         return $this->db->fetchAll($sql, $params);

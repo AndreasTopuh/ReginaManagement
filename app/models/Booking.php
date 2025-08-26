@@ -150,6 +150,9 @@ class Booking
 
             $this->db->execute($sql, $params);
 
+            // Add booking history entry
+            $this->addHistory($booking_id, 'created', 'Booking dibuat dengan kode: ' . $booking_code);
+
             // Commit transaction
             $this->db->commit();
 
@@ -207,6 +210,9 @@ class Booking
 
             $this->db->execute($sql, [$id]);
 
+            // Add booking history entry
+            $this->addHistory($id, 'checked_in', 'Guest melakukan check-in');
+
             $this->db->commit();
             return true;
         } catch (Exception $e) {
@@ -232,6 +238,9 @@ class Booking
 
             $this->db->execute($sql, [$id]);
 
+            // Add booking history entry
+            $this->addHistory($id, 'checked_out', 'Guest melakukan check-out');
+
             $this->db->commit();
             return true;
         } catch (Exception $e) {
@@ -247,7 +256,7 @@ class Booking
             $this->db->beginTransaction();
 
             // Update booking status
-            $this->updateStatus($id, 'Cancelled');
+            $this->updateStatus($id, 'Canceled');
 
             // Update room status to Available (if not occupied by other bookings)
             $sql = "UPDATE rooms r 
@@ -263,6 +272,9 @@ class Booking
                     )";
 
             $this->db->execute($sql, [$id, $id]);
+
+            // Add booking history entry
+            $this->addHistory($id, 'canceled', 'Booking dibatalkan');
 
             $this->db->commit();
             return true;
@@ -288,8 +300,8 @@ class Booking
                     SUM(CASE WHEN b.status = 'Pending' THEN 1 ELSE 0 END) as pending_bookings,
                     SUM(CASE WHEN b.status = 'CheckedIn' THEN 1 ELSE 0 END) as checkedin_bookings,
                     SUM(CASE WHEN b.status = 'CheckedOut' THEN 1 ELSE 0 END) as checkedout_bookings,
-                    SUM(CASE WHEN b.status = 'Cancelled' THEN 1 ELSE 0 END) as cancelled_bookings,
-                    COALESCE(SUM(b.grand_total), 0) as total_revenue
+                    SUM(CASE WHEN b.status = 'Canceled' THEN 1 ELSE 0 END) as cancelled_bookings,
+                    COALESCE(SUM(CASE WHEN b.status != 'Canceled' THEN b.grand_total ELSE 0 END), 0) as total_revenue
                 FROM bookings b 
                 $where_clause";
 
@@ -315,15 +327,15 @@ class Booking
     {
         $sql = "SELECT 
                     COUNT(*) as total_bookings,
-                    COALESCE(SUM(b.grand_total), 0) as total_revenue,
-                    COALESCE(SUM(b.total_room_amount), 0) as total_room_amount,
-                    COALESCE(SUM(b.tax_amount), 0) as total_tax,
-                    COALESCE(SUM(b.service_amount), 0) as total_service,
-                    COALESCE(AVG(b.grand_total), 0) as average_booking_value,
+                    COALESCE(SUM(CASE WHEN b.status != 'Canceled' THEN b.grand_total ELSE 0 END), 0) as total_revenue,
+                    COALESCE(SUM(CASE WHEN b.status != 'Canceled' THEN b.total_room_amount ELSE 0 END), 0) as total_room_amount,
+                    COALESCE(SUM(CASE WHEN b.status != 'Canceled' THEN b.tax_amount ELSE 0 END), 0) as total_tax,
+                    COALESCE(SUM(CASE WHEN b.status != 'Canceled' THEN b.service_amount ELSE 0 END), 0) as total_service,
+                    COALESCE(AVG(CASE WHEN b.status != 'Canceled' THEN b.grand_total ELSE NULL END), 0) as average_booking_value,
                     SUM(CASE WHEN b.status = 'CheckedOut' THEN 1 ELSE 0 END) as completed_bookings,
                     SUM(CASE WHEN b.status = 'CheckedIn' THEN 1 ELSE 0 END) as active_bookings,
                     SUM(CASE WHEN b.status = 'Pending' THEN 1 ELSE 0 END) as pending_bookings,
-                    SUM(CASE WHEN b.status = 'Cancelled' THEN 1 ELSE 0 END) as cancelled_bookings
+                    SUM(CASE WHEN b.status = 'Canceled' THEN 1 ELSE 0 END) as cancelled_bookings
                 FROM bookings b 
                 WHERE DATE(b.created_at) BETWEEN ? AND ?";
 
@@ -341,7 +353,7 @@ class Booking
                     COALESCE(AVG(b.grand_total), 0) as average_revenue
                 FROM bookings b 
                 WHERE DATE(b.created_at) BETWEEN ? AND ?
-                AND b.status != 'Cancelled'
+                AND b.status != 'Canceled'
                 GROUP BY DATE_FORMAT(b.created_at, '$date_format')
                 ORDER BY period ASC";
 
@@ -361,7 +373,7 @@ class Booking
                 JOIN rooms r ON br.room_id = r.id
                 JOIN room_types rt ON r.type_id = rt.id
                 WHERE DATE(b.created_at) BETWEEN ? AND ?
-                AND b.status != 'Cancelled'
+                AND b.status != 'Canceled'
                 GROUP BY rt.id, rt.type_name
                 ORDER BY total_revenue DESC";
 
@@ -378,7 +390,7 @@ class Booking
                     COALESCE(SUM(b.grand_total), 0) as total_revenue
                 FROM bookings b 
                 WHERE b.created_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
-                AND b.status != 'Cancelled'
+                AND b.status != 'Canceled'
                 GROUP BY DATE_FORMAT(b.created_at, '%Y-%m'), MONTHNAME(b.created_at), YEAR(b.created_at)
                 ORDER BY month DESC";
 
@@ -400,7 +412,7 @@ class Booking
                 JOIN room_types rt ON r.type_id = rt.id
                 JOIN floors f ON r.floor_id = f.id
                 WHERE DATE(b.created_at) BETWEEN ? AND ?
-                AND b.status != 'Cancelled'
+                AND b.status != 'Canceled'
                 GROUP BY r.id, r.room_number, rt.type_name, f.floor_number
                 ORDER BY room_revenue DESC
                 LIMIT ?";
@@ -420,7 +432,7 @@ class Booking
                     AVG(DATEDIFF(b.created_at, b.checkin_date)) as average_booking_lead_time
                 FROM bookings b 
                 WHERE DATE(b.created_at) BETWEEN ? AND ?
-                AND b.status != 'Cancelled'";
+                AND b.status != 'Canceled'";
 
         return $this->db->fetchOne($sql, [$date_from, $date_to]);
     }
@@ -537,7 +549,7 @@ class Booking
                 AND b.status IN ('CheckedIn', 'CheckedOut')";
 
         $result = $this->db->fetchOne($sql, [$date_from, $date_to]);
-        
+
         // Ensure we return valid data even if no results
         return $result ?: [
             'occupied_rooms' => 0,
@@ -558,7 +570,7 @@ class Booking
                     COALESCE(SUM(grand_total), 0) as revenue
                 FROM bookings 
                 WHERE checkin_date BETWEEN ? AND ?
-                AND status != 'Cancelled'";
+                AND status != 'Canceled'";
 
         // Current period revenue
         $current_result = $this->db->fetchOne($sql, [$date_from, $date_to]);
@@ -579,5 +591,34 @@ class Booking
             'growth_amount' => $current_revenue - $previous_revenue,
             'growth_rate' => round($growth_rate, 2)
         ];
+    }
+
+    /**
+     * Add booking history entry
+     */
+    public function addHistory($booking_id, $action_type, $description = null, $action_by = null)
+    {
+        if ($action_by === null) {
+            $action_by = $_SESSION['user_id'] ?? 1; // Default to admin if no session
+        }
+
+        $sql = "INSERT INTO booking_history (booking_id, action_type, action_description, action_by) 
+                VALUES (?, ?, ?, ?)";
+
+        return $this->db->execute($sql, [$booking_id, $action_type, $description, $action_by]);
+    }
+
+    /**
+     * Get booking history
+     */
+    public function getHistory($booking_id)
+    {
+        $sql = "SELECT bh.*, u.name as action_by_name 
+                FROM booking_history bh
+                JOIN users u ON bh.action_by = u.id
+                WHERE bh.booking_id = ?
+                ORDER BY bh.action_at ASC";
+
+        return $this->db->query($sql, [$booking_id])->fetchAll();
     }
 }

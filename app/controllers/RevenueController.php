@@ -19,6 +19,18 @@ class RevenueController
             exit;
         }
 
+        // Check if detailed action is requested
+        $action = $_GET['action'] ?? '';
+        if ($action === 'detailed') {
+            $this->detailed();
+            return;
+        }
+
+        if ($action === 'export') {
+            $this->export();
+            return;
+        }
+
         // Get filter parameters
         $date_from = $_GET['date_from'] ?? date('Y-m-01'); // First day of current month
         $date_to = $_GET['date_to'] ?? date('Y-m-d'); // Today
@@ -67,10 +79,15 @@ class RevenueController
 
     public function detailed()
     {
-        if (!hasPermission(['Owner', 'Admin'])) {
-            setFlashMessage('Access denied!', 'error');
-            header('Location: ' . BASE_URL . '/dashboard.php');
-            exit;
+        // Permission already checked in index() method when called via action parameter
+        // Only check if called directly
+        if (!isset($_GET['action'])) {
+            requireLogin();
+            if (!hasPermission(['Owner', 'Admin'])) {
+                setFlashMessage('error', 'Access denied!');
+                header('Location: ' . BASE_URL . '/dashboard');
+                exit;
+            }
         }
 
         // Get filter parameters with smart defaults

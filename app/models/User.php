@@ -207,37 +207,57 @@ class User
         $sql = "UPDATE users SET ";
         $fields = [];
         $params = [];
-        
+
         if (isset($data['name'])) {
             $fields[] = "name = ?";
             $params[] = $data['name'];
         }
-        
+
         if (isset($data['username'])) {
             $fields[] = "username = ?";
             $params[] = $data['username'];
         }
-        
+
         if (isset($data['password'])) {
             $fields[] = "password = ?";
             $params[] = $data['password'];
         }
-        
+
         if (isset($data['role_id'])) {
             $fields[] = "role_id = ?";
             $params[] = $data['role_id'];
         }
-        
+
         $sql .= implode(", ", $fields);
         $sql .= " WHERE id = ?";
         $params[] = $id;
-        
+
         return $this->db->execute($sql, $params);
     }
 
     public function updateStatus($id, $status)
     {
-        $sql = "UPDATE users SET status = ? WHERE id = ?";
+        $sql = "UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?";
         return $this->db->execute($sql, [$status, $id]);
+    }
+
+    // Additional utility methods for better consistency
+    public function findByEmail($email)
+    {
+        return $this->getUserByEmail($email);
+    }
+
+    public function exists($field, $value, $exclude_id = null)
+    {
+        $sql = "SELECT id FROM users WHERE $field = ?";
+        $params = [$value];
+
+        if ($exclude_id) {
+            $sql .= " AND id != ?";
+            $params[] = $exclude_id;
+        }
+
+        $result = $this->db->fetchOne($sql, $params);
+        return !empty($result);
     }
 }

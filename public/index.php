@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Regina Hotel Management System
  * Single Entry Point
@@ -18,6 +19,15 @@ require_once CONFIG_PATH . '/config.php';
 // Load core classes
 require_once APP_PATH . '/core/Router.php';
 require_once APP_PATH . '/core/BaseController.php';
+
+// Load controllers
+require_once APP_PATH . '/controllers/AuthController.php';
+require_once APP_PATH . '/controllers/DashboardController.php';
+require_once APP_PATH . '/controllers/BookingController.php';
+require_once APP_PATH . '/controllers/RoomController.php';
+require_once APP_PATH . '/controllers/FloorController.php';
+require_once APP_PATH . '/controllers/UserController.php';
+require_once APP_PATH . '/controllers/RevenueController.php';
 
 // Load models
 require_once APP_PATH . '/models/User.php';
@@ -48,6 +58,7 @@ $router->post('/bookings/create', 'BookingController@store');
 $router->post('/bookings', 'BookingController@store');
 $router->post('/bookings/checkAvailability', 'BookingController@checkAvailability');
 $router->get('/bookings/{id}', 'BookingController@show');
+$router->post('/bookings/{id}', 'BookingController@show'); // Handle POST actions in show method
 $router->post('/bookings/{id}/update', 'BookingController@update');
 $router->post('/bookings/{id}/checkin', 'BookingController@checkin');
 $router->post('/bookings/{id}/checkout', 'BookingController@checkout');
@@ -57,24 +68,28 @@ $router->post('/bookings/{id}/cancel', 'BookingController@cancel');
 $router->get('/rooms', 'RoomController@index');
 $router->get('/rooms/create', 'RoomController@create');
 $router->post('/rooms', 'RoomController@store');
+$router->get('/rooms/{id}', 'RoomController@show');
 $router->get('/rooms/{id}/edit', 'RoomController@edit');
+$router->post('/rooms/{id}/edit', 'RoomController@edit');
 $router->post('/rooms/{id}', 'RoomController@update');
+$router->post('/rooms/{id}/delete', 'RoomController@delete');
 
 // === FLOOR ROUTES ===
 $router->get('/floors', 'FloorController@index');
-$router->get('/floors/create', 'FloorController@create');
-$router->post('/floors', 'FloorController@store');
-$router->get('/floors/{id}', 'FloorController@show');
+$router->get('/floors/create', 'FloorController@add');
+$router->post('/floors', 'FloorController@add');
+$router->get('/floors/{id}', 'FloorController@detail');
 $router->get('/floors/{id}/edit', 'FloorController@edit');
-$router->post('/floors/{id}', 'FloorController@update');
+$router->post('/floors/{id}', 'FloorController@edit');
 $router->post('/floors/{id}/delete', 'FloorController@delete');
 
 // === USER ROUTES ===
 $router->get('/users', 'UserController@index');
 $router->get('/users/create', 'UserController@create');
-$router->post('/users', 'UserController@store');
+$router->post('/users', 'UserController@create');  // For form submission
 $router->get('/users/{id}/edit', 'UserController@edit');
-$router->post('/users/{id}', 'UserController@update');
+$router->post('/users/{id}/edit', 'UserController@edit');
+$router->post('/users/{id}', 'UserController@edit');  // For edit form submission
 $router->post('/users/{id}/delete', 'UserController@delete');
 $router->post('/users/{id}/toggle-status', 'UserController@toggleStatus');
 
@@ -97,7 +112,7 @@ try {
     $router->dispatch();
 } catch (Exception $e) {
     error_log("Application error: " . $e->getMessage());
-    
+
     if (APP_DEBUG) {
         echo "<h1>Application Error</h1>";
         echo "<pre>" . $e->getMessage() . "\n" . $e->getTraceAsString() . "</pre>";

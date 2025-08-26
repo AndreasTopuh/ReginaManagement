@@ -7,7 +7,7 @@ include INCLUDES_PATH . '/header.php';
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-users"></i> User Management</h1>
-            <a href="<?= BASE_URL ?>/users?action=create" class="btn btn-primary">
+            <a href="<?= BASE_URL ?>/users/create" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add New User
             </a>
         </div>
@@ -93,7 +93,7 @@ endif; ?>
                                             <div class="btn-group" role="group">
                                                 <!-- Edit Button -->
                                                 <?php if ($user['role_name'] !== 'Owner' || SessionManager::getUserRole() === 'Owner'): ?>
-                                                    <a href="<?= BASE_URL ?>/users?action=edit&id=<?= $user['id'] ?>"
+                                                    <a href="<?= BASE_URL ?>/users/<?= $user['id'] ?>/edit"
                                                         class="btn btn-sm btn-outline-primary" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
@@ -104,12 +104,14 @@ endif; ?>
                                                     $user['id'] != $_SESSION['user_id'] &&
                                                     ($user['role_name'] !== 'Owner' || SessionManager::getUserRole() === 'Owner')
                                                 ): ?>
-                                                    <a href="<?= BASE_URL ?>/users?action=toggle-status&id=<?= $user['id'] ?>"
-                                                        class="btn btn-sm btn-outline-<?= $user['status'] == 1 ? 'warning' : 'success' ?>"
-                                                        title="<?= $user['status'] == 1 ? 'Deactivate' : 'Activate' ?>"
-                                                        onclick="return confirm('Are you sure you want to <?= $user['status'] == 1 ? 'deactivate' : 'activate' ?> this user?')">
-                                                        <i class="fas fa-<?= $user['status'] == 1 ? 'ban' : 'check' ?>"></i>
-                                                    </a>
+                                                    <form method="POST" action="<?= BASE_URL ?>/users/<?= $user['id'] ?>/toggle-status" style="display: inline;">
+                                                        <button type="submit"
+                                                            class="btn btn-sm btn-outline-<?= $user['status'] == 1 ? 'warning' : 'success' ?>"
+                                                            title="<?= $user['status'] == 1 ? 'Deactivate' : 'Activate' ?>"
+                                                            onclick="return confirm('Are you sure you want to <?= $user['status'] == 1 ? 'deactivate' : 'activate' ?> this user?')">
+                                                            <i class="fas fa-<?= $user['status'] == 1 ? 'ban' : 'check' ?>"></i>
+                                                        </button>
+                                                    </form>
                                                 <?php endif; ?>
 
                                                 <!-- Delete Button -->
@@ -117,11 +119,12 @@ endif; ?>
                                                     $user['id'] != $_SESSION['user_id'] &&
                                                     ($user['role_name'] !== 'Owner' || SessionManager::getUserRole() === 'Owner')
                                                 ): ?>
-                                                    <a href="<?= BASE_URL ?>/users?action=delete&id=<?= $user['id'] ?>"
-                                                        class="btn btn-sm btn-outline-danger" title="Delete"
-                                                        onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                                    <form method="POST" action="<?= BASE_URL ?>/users/<?= $user['id'] ?>/delete" style="display: inline;">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"
+                                                            onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
                                                 <?php endif; ?>
                                             </div>
                                         </td>

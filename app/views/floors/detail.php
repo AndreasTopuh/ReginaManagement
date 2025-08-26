@@ -65,80 +65,81 @@ include INCLUDES_PATH . '/header.php';
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5>Rooms on Floor <?= $floor['floor_number'] ?></h5>
                 <?php if (hasPermission(['Owner', 'Admin'])): ?>
-                <a href="<?= BASE_URL ?>/rooms?action=add&floor_id=<?= $floor['id'] ?>" class="btn btn-sm btn-primary">
-                    <i class="fas fa-plus"></i> Add Room
-                </a>
+                    <a href="<?= BASE_URL ?>/rooms/create?floor_id=<?= $floor['id'] ?>" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> Add Room
+                    </a>
                 <?php endif; ?>
             </div>
             <div class="card-body">
                 <?php if (empty($rooms)): ?>
-                <div class="text-center text-muted py-5">
-                    <i class="fas fa-bed fa-3x mb-3"></i>
-                    <h5>No rooms on this floor</h5>
-                    <p>This floor doesn't have any rooms yet.</p>
-                    <?php if (hasPermission(['Owner', 'Admin'])): ?>
-                    <a href="<?= BASE_URL ?>/rooms?action=add&floor_id=<?= $floor['id'] ?>" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Add First Room
-                    </a>
-                    <?php endif; ?>
-                </div>
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-bed fa-3x mb-3"></i>
+                        <h5>No rooms on this floor</h5>
+                        <p>This floor doesn't have any rooms yet.</p>
+                        <?php if (hasPermission(['Owner', 'Admin'])): ?>
+                            <a href="<?= BASE_URL ?>/rooms/create?floor_id=<?= $floor['id'] ?>" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add First Room
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Room Number</th>
-                                <th>Type</th>
-                                <th>Price/Night</th>
-                                <th>Status</th>
-                                <th>Features</th>
-                                <?php if (hasPermission(['Owner', 'Admin'])): ?>
-                                <th>Actions</th>
-                                <?php endif; ?>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($rooms as $room): ?>
-                            <tr>
-                                <td>
-                                    <strong><?= htmlspecialchars($room['room_number']) ?></strong>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info"><?= htmlspecialchars($room['type_name']) ?></span>
-                                </td>
-                                <td><?= formatCurrency($room['price']) ?></td>
-                                <td>
-                                    <?php
-                                    $status_class = [
-                                        'Available' => 'success',
-                                        'Occupied' => 'warning',
-                                        'OutOfService' => 'danger'
-                                    ];
-                                    ?>
-                                    <span class="badge bg-<?= $status_class[$room['status']] ?>">
-                                        <?= $room['status'] ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <?php if (!empty($room['features'])): ?>
-                                    <small class="text-muted"><?= htmlspecialchars($room['features']) ?></small>
-                                    <?php else: ?>
-                                    <small class="text-muted">No features listed</small>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Room Number</th>
+                                    <th>Type</th>
+                                    <th>Price/Night</th>
+                                    <th>Status</th>
+                                    <th>Features</th>
+                                    <?php if (hasPermission(['Owner', 'Admin'])): ?>
+                                        <th>Actions</th>
                                     <?php endif; ?>
-                                </td>
-                                <?php if (hasPermission(['Owner', 'Admin'])): ?>
-                                <td>
-                                    <a href="<?= BASE_URL ?>/rooms?action=edit&id=<?= $room['id'] ?>" 
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </td>
-                                <?php endif; ?>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($rooms as $room): ?>
+                                    <tr>
+                                        <td>
+                                            <strong><?= htmlspecialchars($room['room_number']) ?></strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info"><?= htmlspecialchars($room['type_name']) ?></span>
+                                        </td>
+                                        <td><?= formatCurrency($room['price']) ?></td>
+                                        <td>
+                                            <?php
+                                            $status_class = [
+                                                'Available' => 'success',
+                                                'Occupied' => 'warning',
+                                                'OutOfService' => 'danger'
+                                            ];
+                                            ?>
+                                            <span class="badge bg-<?= $status_class[$room['status']] ?>">
+                                                <?= $room['status'] ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($room['features'])): ?>
+                                                <small class="text-muted"><?= htmlspecialchars($room['features']) ?></small>
+                                            <?php else: ?>
+                                                <small class="text-muted">No features listed</small>
+                                            <?php endif; ?>
+                                        </td>
+                                        <?php if (hasPermission(['Owner', 'Admin'])): ?>
+                                            <td>
+                                                <a href="<?= BASE_URL ?>/rooms/<?= $room['id'] ?>/edit"
+                                                    class="btn btn-sm btn-outline-primary"
+                                                    title="Edit Room <?= $room['room_number'] ?>">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </td>
+                                        <?php endif; ?>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>

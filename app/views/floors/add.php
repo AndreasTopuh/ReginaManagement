@@ -21,18 +21,18 @@ include INCLUDES_PATH . '/header.php';
                 <h5>Floor Information</h5>
             </div>
             <div class="card-body">
-                <form method="POST" class="needs-validation" novalidate>
+                <form method="POST" action="<?= BASE_URL ?>/floors" class="needs-validation" novalidate>
                     <div class="mb-3">
                         <label for="floor_number" class="form-label">Floor Number <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="floor_number" name="floor_number" 
-                               value="<?= htmlspecialchars($_POST['floor_number'] ?? '') ?>" 
-                               min="1" max="50" required>
+                        <input type="number" class="form-control" id="floor_number" name="floor_number"
+                            value="<?= htmlspecialchars($_POST['floor_number'] ?? '') ?>"
+                            min="1" max="50" required>
                         <div class="form-text">Enter the floor number (e.g., 1, 2, 3, etc.)</div>
                         <div class="invalid-feedback">
                             Please provide a valid floor number (1-50).
                         </div>
                     </div>
-                    
+
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Save Floor
