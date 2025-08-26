@@ -286,33 +286,33 @@ include INCLUDES_PATH . '/header.php';
 
                 <!-- Overall Occupancy Rate -->
                 <?php if (($room_stats['total_rooms'] ?? 0) > 0): ?>
-                <div class="mt-4">
-                    <?php 
-                    $total_rooms = $room_stats['total_rooms'] ?? 0;
-                    $occupied_rooms = $room_stats['occupied_rooms'] ?? 0;
-                    $occupancy_rate = $total_rooms > 0 ? ($occupied_rooms / $total_rooms) * 100 : 0;
-                    $progress_class = $occupancy_rate <= 50 ? 'success' : ($occupancy_rate <= 80 ? 'warning' : 'danger');
-                    ?>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">Overall Occupancy Rate</h6>
-                        <span class="fw-bold"><?= number_format($occupancy_rate, 1) ?>%</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-<?= $progress_class ?>" 
-                             style="width: <?= $occupancy_rate ?>%"></div>
-                    </div>
-                    <div class="row text-center mt-3">
-                        <div class="col-4">
-                            <small class="text-success">Available: <?= $room_stats['available_rooms'] ?? 0 ?></small>
+                    <div class="mt-4">
+                        <?php
+                        $total_rooms = $room_stats['total_rooms'] ?? 0;
+                        $occupied_rooms = $room_stats['occupied_rooms'] ?? 0;
+                        $occupancy_rate = $total_rooms > 0 ? ($occupied_rooms / $total_rooms) * 100 : 0;
+                        $progress_class = $occupancy_rate <= 50 ? 'success' : ($occupancy_rate <= 80 ? 'warning' : 'danger');
+                        ?>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Overall Occupancy Rate</h6>
+                            <span class="fw-bold"><?= number_format($occupancy_rate, 1) ?>%</span>
                         </div>
-                        <div class="col-4">
-                            <small class="text-warning">Occupied: <?= $room_stats['occupied_rooms'] ?? 0 ?></small>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-<?= $progress_class ?>"
+                                style="width: <?= $occupancy_rate ?>%"></div>
                         </div>
-                        <div class="col-4">
-                            <small class="text-danger">Out of Service: <?= $room_stats['out_of_service_rooms'] ?? 0 ?></small>
+                        <div class="row text-center mt-3">
+                            <div class="col-4">
+                                <small class="text-success">Available: <?= $room_stats['available_rooms'] ?? 0 ?></small>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-warning">Occupied: <?= $room_stats['occupied_rooms'] ?? 0 ?></small>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-danger">Out of Service: <?= $room_stats['out_of_service_rooms'] ?? 0 ?></small>
+                            </div>
                         </div>
                     </div>
-                </div>
                 <?php endif; ?>
 
                 <!-- Visual representation of room status -->
@@ -323,7 +323,7 @@ include INCLUDES_PATH . '/header.php';
                         $available_rooms = $room_stats['available_rooms'] ?? 0;
                         $occupied_rooms = $room_stats['occupied_rooms'] ?? 0;
                         $out_of_service_rooms = $room_stats['out_of_service_rooms'] ?? 0;
-                        
+
                         if ($total_rooms > 0) {
                             $available_percentage = ($available_rooms / $total_rooms) * 100;
                             $occupied_percentage = ($occupied_rooms / $total_rooms) * 100;
@@ -332,7 +332,7 @@ include INCLUDES_PATH . '/header.php';
                             $available_percentage = $occupied_percentage = $out_of_service_percentage = 0;
                         }
                         ?>
-                        
+
                         <!-- Available Rooms Bar -->
                         <div class="col-4">
                             <div class="p-3 rounded text-center text-white" style="background-color: #28a745; height: 80px;">
@@ -343,7 +343,7 @@ include INCLUDES_PATH . '/header.php';
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Occupied Rooms Bar -->
                         <div class="col-4">
                             <div class="p-3 rounded text-center text-white" style="background-color: #ffc107; height: 80px;">
@@ -354,7 +354,7 @@ include INCLUDES_PATH . '/header.php';
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Out of Service Rooms Bar -->
                         <div class="col-4">
                             <div class="p-3 rounded text-center text-white" style="background-color: #dc3545; height: 80px;">

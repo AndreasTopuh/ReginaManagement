@@ -49,10 +49,7 @@ include INCLUDES_PATH . '/header.php';
         <!-- Right Side - Image Gallery -->
         <div class="login-right">
             <div class="image-gallery">
-                <div class="welcome-text">
-                    <h2>Welcome to Regina Hotel</h2>
-                    <p>Log in to manage your bookings, access exclusive offers, and enjoy a personalized experience every time you stay with us.</p>
-                </div>
+
 
                 <div class="gallery-grid">
                     <div class="gallery-item">
@@ -73,6 +70,11 @@ include INCLUDES_PATH . '/header.php';
                     <div class="gallery-item">
                         <img src="images/picutre6.jpg" alt="Hotel Pool Area" class="gallery-img">
                     </div>
+                </div>
+
+                <div class="welcome-text">
+                    <h2>Welcome to Regina Hotel</h2>
+                    <p>Log in to manage your bookings, access exclusive offers, and enjoy a personalized experience every time you stay with us.</p>
                 </div>
 
                 <!-- <div class="gallery-dots">
