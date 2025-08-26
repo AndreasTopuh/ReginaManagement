@@ -21,7 +21,7 @@ include INCLUDES_PATH . '/header.php';
 <!-- Statistics Cards Row -->
 <div class="row g-3 mb-4">
     <!-- New Bookings -->
-    <div class="col-xl-3 col-md-6">
+    <!-- <div class="col-xl-3 col-md-6">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center">
@@ -40,7 +40,7 @@ include INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Check In -->
     <div class="col-xl-3 col-md-6">
@@ -87,7 +87,7 @@ include INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Total Revenue -->
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-6 col-md-6">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center">
@@ -261,7 +261,7 @@ include INCLUDES_PATH . '/header.php';
                     <div class="col-3">
                         <div class="p-3">
                             <h3 class="text-primary mb-1"><?= $room_stats['total_rooms'] ?? 0 ?></h3>
-                            <p class="text-muted mb-0">Occupied</p>
+                            <p class="text-muted mb-0">Total Rooms</p>
                         </div>
                     </div>
                     <div class="col-3">
@@ -273,25 +273,97 @@ include INCLUDES_PATH . '/header.php';
                     <div class="col-3">
                         <div class="p-3">
                             <h3 class="text-warning mb-1"><?= $room_stats['occupied_rooms'] ?? 0 ?></h3>
-                            <p class="text-muted mb-0">Available</p>
+                            <p class="text-muted mb-0">Occupied</p>
                         </div>
                     </div>
                     <div class="col-3">
                         <div class="p-3">
                             <h3 class="text-danger mb-1"><?= $room_stats['out_of_service_rooms'] ?? 0 ?></h3>
-                            <p class="text-muted mb-0">Not Available</p>
+                            <p class="text-muted mb-0">Out of Service</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Visual representation of room status -->
-                <div class="mt-3">
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <div class="p-3 rounded" style="background-color: #8B4513; height: 80px;"></div>
+                <!-- Overall Occupancy Rate -->
+                <?php if (($room_stats['total_rooms'] ?? 0) > 0): ?>
+                <div class="mt-4">
+                    <?php 
+                    $total_rooms = $room_stats['total_rooms'] ?? 0;
+                    $occupied_rooms = $room_stats['occupied_rooms'] ?? 0;
+                    $occupancy_rate = $total_rooms > 0 ? ($occupied_rooms / $total_rooms) * 100 : 0;
+                    $progress_class = $occupancy_rate <= 50 ? 'success' : ($occupancy_rate <= 80 ? 'warning' : 'danger');
+                    ?>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Overall Occupancy Rate</h6>
+                        <span class="fw-bold"><?= number_format($occupancy_rate, 1) ?>%</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-<?= $progress_class ?>" 
+                             style="width: <?= $occupancy_rate ?>%"></div>
+                    </div>
+                    <div class="row text-center mt-3">
+                        <div class="col-4">
+                            <small class="text-success">Available: <?= $room_stats['available_rooms'] ?? 0 ?></small>
                         </div>
-                        <div class="col-6">
-                            <div class="p-3 rounded" style="background-color: #D2B48C; height: 80px;"></div>
+                        <div class="col-4">
+                            <small class="text-warning">Occupied: <?= $room_stats['occupied_rooms'] ?? 0 ?></small>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-danger">Out of Service: <?= $room_stats['out_of_service_rooms'] ?? 0 ?></small>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Visual representation of room status -->
+                <div class="mt-4">
+                    <div class="row g-2">
+                        <?php
+                        $total_rooms = $room_stats['total_rooms'] ?? 0;
+                        $available_rooms = $room_stats['available_rooms'] ?? 0;
+                        $occupied_rooms = $room_stats['occupied_rooms'] ?? 0;
+                        $out_of_service_rooms = $room_stats['out_of_service_rooms'] ?? 0;
+                        
+                        if ($total_rooms > 0) {
+                            $available_percentage = ($available_rooms / $total_rooms) * 100;
+                            $occupied_percentage = ($occupied_rooms / $total_rooms) * 100;
+                            $out_of_service_percentage = ($out_of_service_rooms / $total_rooms) * 100;
+                        } else {
+                            $available_percentage = $occupied_percentage = $out_of_service_percentage = 0;
+                        }
+                        ?>
+                        
+                        <!-- Available Rooms Bar -->
+                        <div class="col-4">
+                            <div class="p-3 rounded text-center text-white" style="background-color: #28a745; height: 80px;">
+                                <div class="d-flex flex-column justify-content-center h-100">
+                                    <h5 class="mb-0"><?= $available_rooms ?></h5>
+                                    <small>Available</small>
+                                    <small><?= number_format($available_percentage, 1) ?>%</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Occupied Rooms Bar -->
+                        <div class="col-4">
+                            <div class="p-3 rounded text-center text-white" style="background-color: #ffc107; height: 80px;">
+                                <div class="d-flex flex-column justify-content-center h-100">
+                                    <h5 class="mb-0"><?= $occupied_rooms ?></h5>
+                                    <small>Occupied</small>
+                                    <small><?= number_format($occupied_percentage, 1) ?>%</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Out of Service Rooms Bar -->
+                        <div class="col-4">
+                            <div class="p-3 rounded text-center text-white" style="background-color: #dc3545; height: 80px;">
+                                <div class="d-flex flex-column justify-content-center h-100">
+                                    <h5 class="mb-0"><?= $out_of_service_rooms ?></h5>
+                                    <small>Out of Service</small>
+                                    <small><?= number_format($out_of_service_percentage, 1) ?>%</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
