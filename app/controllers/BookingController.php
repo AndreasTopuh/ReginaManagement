@@ -18,18 +18,18 @@ class BookingController extends BaseController
         $this->requireLogin();
 
         $search = $_GET['search'] ?? '';
-        $date_from = $_GET['date_from'] ?? '';
-        $date_to = $_GET['date_to'] ?? '';
+        $checkin_from = $_GET['checkin_from'] ?? '';
+        $checkout_to = $_GET['checkout_to'] ?? '';
         $status = $_GET['status'] ?? '';
 
-        $bookings = $this->bookingModel->getAll($search, $date_from, $date_to, $status);
+        $bookings = $this->bookingModel->getAll($search, $checkin_from, $checkout_to, $status);
 
         $this->render('bookings/index', [
             'title' => 'Bookings Management - Regina Hotel',
             'bookings' => $bookings,
             'search' => $search,
-            'date_from' => $date_from,
-            'date_to' => $date_to,
+            'checkin_from' => $checkin_from,
+            'checkout_to' => $checkout_to,
             'status' => $status
         ]);
     }

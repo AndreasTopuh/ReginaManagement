@@ -8,7 +8,7 @@ class Booking
         $this->db = Database::getInstance();
     }
 
-    public function getAll($search = '', $date_from = '', $date_to = '', $status = '')
+    public function getAll($search = '', $checkin_from = '', $checkout_to = '', $status = '')
     {
         $sql = "SELECT b.*, g.full_name as guest_name, u.name as created_by_name,
                     GROUP_CONCAT(r.room_number ORDER BY r.room_number SEPARATOR ', ') as room_numbers
@@ -28,14 +28,14 @@ class Booking
             $params[] = $search_param;
         }
 
-        if (!empty($date_from)) {
+        if (!empty($checkin_from)) {
             $conditions[] = "DATE(b.checkin_date) >= ?";
-            $params[] = $date_from;
+            $params[] = $checkin_from;
         }
 
-        if (!empty($date_to)) {
+        if (!empty($checkout_to)) {
             $conditions[] = "DATE(b.checkout_date) <= ?";
-            $params[] = $date_to;
+            $params[] = $checkout_to;
         }
 
         if (!empty($status)) {

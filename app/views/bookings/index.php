@@ -27,14 +27,14 @@ include INCLUDES_PATH . '/header.php';
                                value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
                     </div>
                     <div class="col-md-2">
-                        <label for="date_from" class="form-label">Check-in From</label>
-                        <input type="date" class="form-control" id="date_from" name="date_from" 
-                               value="<?= $_GET['date_from'] ?? '' ?>">
+                        <label for="checkin_from" class="form-label">Check-in Dari</label>
+                        <input type="date" class="form-control" id="checkin_from" name="checkin_from" 
+                               value="<?= $_GET['checkin_from'] ?? '' ?>">
                     </div>
                     <div class="col-md-2">
-                        <label for="date_to" class="form-label">Check-in To</label>
-                        <input type="date" class="form-control" id="date_to" name="date_to" 
-                               value="<?= $_GET['date_to'] ?? '' ?>">
+                        <label for="checkout_to" class="form-label">Check-out Sampai</label>
+                        <input type="date" class="form-control" id="checkout_to" name="checkout_to" 
+                               value="<?= $_GET['checkout_to'] ?? '' ?>">
                     </div>
                     <div class="col-md-2">
                         <label for="status" class="form-label">Status</label>
@@ -47,7 +47,7 @@ include INCLUDES_PATH . '/header.php';
                         </select>
                     </div>
                     <div class="col-md-3 d-flex align-items-end gap-2">
-                        <button type="submit" class="btn btn-outline-primary">
+                        <button type="submit" class="btn btn-primary">
                             <i class="fas fa-search"></i> Search
                         </button>
                         <a href="<?= BASE_URL ?>/bookings" class="btn btn-outline-secondary">
@@ -55,6 +55,55 @@ include INCLUDES_PATH . '/header.php';
                         </a>
                     </div>
                 </form>
+                
+                <!-- Show active filters -->
+                <?php if (!empty($_GET['checkin_from']) || !empty($_GET['checkout_to']) || !empty($_GET['search']) || !empty($_GET['status'])): ?>
+                <div class="mt-3">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="text-muted">Active filters:</span>
+                        
+                        <?php if (!empty($_GET['search'])): ?>
+                        <span class="badge bg-info">
+                            Search: "<?= htmlspecialchars($_GET['search']) ?>"
+                            <a href="<?= BASE_URL ?>/bookings?<?= http_build_query(array_diff_key($_GET, ['search' => ''])) ?>" 
+                               class="text-white ms-1">×</a>
+                        </span>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($_GET['checkin_from']) && !empty($_GET['checkout_to'])): ?>
+                        <span class="badge bg-success">
+                            Range: Check-in dari <?= formatDate($_GET['checkin_from']) ?>, Check-out sampai <?= formatDate($_GET['checkout_to']) ?>
+                            <a href="<?= BASE_URL ?>/bookings?<?= http_build_query(array_diff_key($_GET, ['checkin_from' => '', 'checkout_to' => ''])) ?>" 
+                               class="text-white ms-1">×</a>
+                        </span>
+                        <?php elseif (!empty($_GET['checkin_from'])): ?>
+                        <span class="badge bg-success">
+                            Check-in dari: <?= formatDate($_GET['checkin_from']) ?>
+                            <a href="<?= BASE_URL ?>/bookings?<?= http_build_query(array_diff_key($_GET, ['checkin_from' => ''])) ?>" 
+                               class="text-white ms-1">×</a>
+                        </span>
+                        <?php elseif (!empty($_GET['checkout_to'])): ?>
+                        <span class="badge bg-success">
+                            Check-out sampai: <?= formatDate($_GET['checkout_to']) ?>
+                            <a href="<?= BASE_URL ?>/bookings?<?= http_build_query(array_diff_key($_GET, ['checkout_to' => ''])) ?>" 
+                               class="text-white ms-1">×</a>
+                        </span>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($_GET['status'])): ?>
+                        <span class="badge bg-warning">
+                            Status: <?= htmlspecialchars($_GET['status']) ?>
+                            <a href="<?= BASE_URL ?>/bookings?<?= http_build_query(array_diff_key($_GET, ['status' => ''])) ?>" 
+                               class="text-white ms-1">×</a>
+                        </span>
+                        <?php endif; ?>
+                        
+                        <a href="<?= BASE_URL ?>/bookings" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-times"></i> Clear All
+                        </a>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
