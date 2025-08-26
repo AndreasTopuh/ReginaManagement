@@ -199,7 +199,7 @@ include INCLUDES_PATH . '/header.php';
         </div>
 
         <div class="col-md-4">
-            <div class="card sticky-top">
+            <div class="card booking-summary-sticky">
                 <div class="card-header">
                     <h6><i class="fas fa-calculator"></i> Booking Summary</h6>
                 </div>
@@ -286,29 +286,29 @@ include INCLUDES_PATH . '/header.php';
 
             // Make AJAX request
             fetch('<?= BASE_URL ?>/bookings/checkAvailability', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update room selection area
-                    updateRoomSelection(data.rooms);
-                    // Show success message
-                    showMessage('success', `Found ${data.count} available rooms for selected dates`);
-                } else {
-                    showMessage('error', data.error || 'Error checking availability');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('error', 'Error checking room availability');
-            })
-            .finally(() => {
-                // Re-enable button
-                checkAvailabilityBtn.disabled = false;
-                checkAvailabilityBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Room Availability';
-            });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update room selection area
+                        updateRoomSelection(data.rooms);
+                        // Show success message
+                        showMessage('success', `Found ${data.count} available rooms for selected dates`);
+                    } else {
+                        showMessage('error', data.error || 'Error checking availability');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('error', 'Error checking room availability');
+                })
+                .finally(() => {
+                    // Re-enable button
+                    checkAvailabilityBtn.disabled = false;
+                    checkAvailabilityBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Room Availability';
+                });
         }
 
         function updateRoomSelection(rooms) {
@@ -380,7 +380,7 @@ include INCLUDES_PATH . '/header.php';
                     bookingDetailsCard = header.closest('.card');
                 }
             });
-            
+
             if (bookingDetailsCard) {
                 // Remove existing room selection card if it exists
                 let nextElement = bookingDetailsCard.nextElementSibling;
@@ -390,7 +390,7 @@ include INCLUDES_PATH . '/header.php';
                         nextElement.remove();
                     }
                 }
-                
+
                 // Insert new room selection
                 bookingDetailsCard.insertAdjacentHTML('afterend', roomSelectionHtml);
 

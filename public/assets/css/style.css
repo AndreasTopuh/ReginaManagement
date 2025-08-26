@@ -9,47 +9,197 @@ body {
     min-height: 100vh;
 }
 
-/* Login page styles */
-.card {
-    border: none;
-    border-radius: 15px;
+/* Dashboard Layout Styles */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.card-body {
+.sidebar .brand {
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.1);
+    color: white;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 1rem 1.5rem;
+    border: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: #3498db;
+}
+
+.main-content {
+    margin-left: 250px;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.top-header {
+    background: white;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.content-area {
     padding: 2rem;
 }
 
-.input-group-text {
-    background-color: #e9ecef;
-    border-right: none;
-}
-
-.form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-}
-
-/* Dashboard styles */
+/* Cards Enhancement */
 .card {
-    transition: transform 0.2s ease-in-out;
-    border-radius: 10px;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
 }
 
 .card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+    background: white;
+    border-bottom: 1px solid #f1f3f4;
     font-weight: 600;
+    padding: 1.25rem;
 }
 
-/* Status badges */
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Statistics Cards */
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Chart Styles */
+.chart-container {
+    margin: 20px 0;
+}
+
+.chart-bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 0 2px;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.chart-bar:hover {
+    opacity: 0.8;
+    transform: scaleY(1.05);
+}
+
+/* Task Items */
+.task-item {
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.task-item:hover {
+    background-color: #e9ecef !important;
+    border-color: #dee2e6;
+    transform: translateX(5px);
+}
+
+/* Table Enhancements */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.table td {
+    vertical-align: middle;
+    border-color: #f1f3f4;
+}
+
+/* Status Badges */
 .badge {
     font-size: 0.75rem;
-    padding: 0.5em 0.75em;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .sidebar {
+        margin-left: -250px;
+    }
+
+    .sidebar.show {
+        margin-left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .content-area {
+        padding: 1rem;
+    }
+
+    .top-header {
+        padding: 1rem;
+    }
+}
+
+/* Login page styles */
 
 /* Table styles */
 .table {
@@ -122,11 +272,11 @@ footer {
     .card-body {
         padding: 1.5rem;
     }
-    
+
     .table-responsive {
         font-size: 0.85rem;
     }
-    
+
     .btn-sm {
         padding: 0.2rem 0.5rem;
         font-size: 0.75rem;

@@ -2,6 +2,84 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     
+    // Sidebar toggle functionality - Simplified and reliable
+    function initSidebarToggle() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+        
+        console.log('Sidebar elements check:', {
+            toggle: !!sidebarToggle,
+            sidebar: !!sidebar,
+            mainContent: !!mainContent,
+            backdrop: !!sidebarBackdrop
+        });
+        
+        if (sidebarToggle && sidebar && mainContent) {
+            console.log('All sidebar elements found, setting up toggle...');
+            
+            // Remove preload class
+            document.documentElement.classList.remove('sidebar-preload-collapsed');
+            
+            // Load saved state
+            const savedState = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (savedState) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+                console.log('Loaded collapsed state');
+            }
+            
+            // Clear any existing onclick handlers
+            sidebarToggle.onclick = null;
+            
+            // Add click event listener with simple approach
+            sidebarToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Toggle button clicked!');
+                
+                // Simple toggle logic
+                if (sidebar.classList.contains('collapsed')) {
+                    // Show sidebar
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('expanded');
+                    localStorage.setItem('sidebarCollapsed', 'false');
+                    console.log('Sidebar shown');
+                } else {
+                    // Hide sidebar
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('expanded');
+                    localStorage.setItem('sidebarCollapsed', 'true');
+                    console.log('Sidebar hidden');
+                }
+            }, { passive: false });
+            
+            // Backdrop click handler for mobile
+            if (sidebarBackdrop) {
+                sidebarBackdrop.addEventListener('click', function() {
+                    sidebar.classList.remove('show');
+                    console.log('Backdrop clicked - closed sidebar');
+                });
+            }
+            
+            console.log('Sidebar toggle setup complete');
+        } else {
+            console.error('Missing sidebar elements:', {
+                toggle: !!sidebarToggle,
+                sidebar: !!sidebar,
+                mainContent: !!mainContent
+            });
+            // Remove preload class anyway
+            document.documentElement.classList.remove('sidebar-preload-collapsed');
+        }
+    }
+    
+    // Initialize immediately
+    console.log('Starting sidebar initialization...');
+    initSidebarToggle();
+    
     // Auto-hide alerts after 5 seconds
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(function(alert) {
