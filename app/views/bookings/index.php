@@ -63,18 +63,7 @@ include INCLUDES_PATH . '/header.php';
                                 <option value="created_admin" <?= ($_GET['sort'] ?? '') === 'created_admin' ? 'selected' : '' ?>>Created by Admin</option>
                                 <option value="created_receptionist" <?= ($_GET['sort'] ?? '') === 'created_receptionist' ? 'selected' : '' ?>>Created by Receptionist</option>
                             </optgroup>
-                            <optgroup label="Floor">
-                                <option value="floor_1" <?= ($_GET['sort'] ?? '') === 'floor_1' ? 'selected' : '' ?>>Lantai 1</option>
-                                <option value="floor_2" <?= ($_GET['sort'] ?? '') === 'floor_2' ? 'selected' : '' ?>>Lantai 2</option>
-                                <option value="floor_3" <?= ($_GET['sort'] ?? '') === 'floor_3' ? 'selected' : '' ?>>Lantai 3</option>
-                                <option value="floor_4" <?= ($_GET['sort'] ?? '') === 'floor_4' ? 'selected' : '' ?>>Lantai 4</option>
-                                <option value="floor_5" <?= ($_GET['sort'] ?? '') === 'floor_5' ? 'selected' : '' ?>>Lantai 5</option>
-                            </optgroup>
-                            <optgroup label="Status">
-                                <option value="status_checkedout" <?= ($_GET['sort'] ?? '') === 'status_checkedout' ? 'selected' : '' ?>>Status: Checked Out</option>
-                                <option value="status_checkedin" <?= ($_GET['sort'] ?? '') === 'status_checkedin' ? 'selected' : '' ?>>Status: Checked In</option>
-                                <option value="status_canceled" <?= ($_GET['sort'] ?? '') === 'status_canceled' ? 'selected' : '' ?>>Status: Canceled</option>
-                            </optgroup>
+            
                         </select>
                     </div>
                     <div class="col-md-2 d-flex align-items-end gap-2">
@@ -139,11 +128,6 @@ include INCLUDES_PATH . '/header.php';
                                     'created_owner' => 'Created by Owner',
                                     'created_admin' => 'Created by Admin',
                                     'created_receptionist' => 'Created by Receptionist',
-                                    'floor_1' => 'Lantai 1',
-                                    'floor_2' => 'Lantai 2',
-                                    'floor_3' => 'Lantai 3',
-                                    'floor_4' => 'Lantai 4',
-                                    'floor_5' => 'Lantai 5',
                                     'status_checkedout' => 'Status: Checked Out',
                                     'status_checkedin' => 'Status: Checked In',
                                     'status_canceled' => 'Status: Canceled'

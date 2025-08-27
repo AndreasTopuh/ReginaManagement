@@ -12,14 +12,13 @@ class Booking
     {
         $sql = "SELECT b.*, g.full_name as guest_name, u.name as created_by_name, ro.role_name as created_by_role,
                     GROUP_CONCAT(r.room_number ORDER BY r.room_number SEPARATOR ', ') as room_numbers,
-                    GROUP_CONCAT(DISTINCT f.floor_number ORDER BY f.floor_number SEPARATOR ', ') as floor_numbers
+                    GROUP_CONCAT(DISTINCT FLOOR(r.room_number/100) ORDER BY FLOOR(r.room_number/100) SEPARATOR ', ') as floor_numbers
                 FROM bookings b 
                 JOIN guests g ON b.guest_id = g.id 
                 JOIN users u ON b.created_by = u.id 
                 JOIN roles ro ON u.role_id = ro.id
                 LEFT JOIN booking_rooms br ON b.id = br.booking_id
-                LEFT JOIN rooms r ON br.room_id = r.id
-                LEFT JOIN floors f ON r.floor_id = f.id";
+                LEFT JOIN rooms r ON br.room_id = r.id";
 
         $conditions = [];
         $params = [];
@@ -59,13 +58,19 @@ class Booking
                     $conditions[] = "ro.role_name = 'Receptionist'";
                     break;
                 case 'floor_1':
+                    $conditions[] = "r.room_number >= 100 AND r.room_number < 200";
+                    break;
                 case 'floor_2':
+                    $conditions[] = "r.room_number >= 200 AND r.room_number < 300";
+                    break;
                 case 'floor_3':
+                    $conditions[] = "r.room_number >= 300 AND r.room_number < 400";
+                    break;
                 case 'floor_4':
+                    $conditions[] = "r.room_number >= 400 AND r.room_number < 500";
+                    break;
                 case 'floor_5':
-                    $floor_num = str_replace('floor_', '', $sort);
-                    $conditions[] = "f.floor_number = ?";
-                    $params[] = $floor_num;
+                    $conditions[] = "r.room_number >= 500 AND r.room_number < 600";
                     break;
                 case 'status_checkedout':
                     $conditions[] = "b.status = 'CheckedOut'";
@@ -110,7 +115,7 @@ class Booking
                 case 'floor_3':
                 case 'floor_4':
                 case 'floor_5':
-                    $sql .= " ORDER BY f.floor_number ASC, r.room_number ASC, b.created_at DESC";
+                    $sql .= " ORDER BY FLOOR(r.room_number/100) ASC, r.room_number ASC, b.created_at DESC";
                     break;
                 case 'status_checkedout':
                 case 'status_checkedin':
