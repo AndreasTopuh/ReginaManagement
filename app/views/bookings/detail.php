@@ -73,7 +73,7 @@ include INCLUDES_PATH . '/header.php';
                             <div class="mb-3">
                                 <label class="form-label">Duration</label>
                                 <div class="form-control-plaintext">
-                                    <span class="badge bg-info"><?= $booking['duration_nights'] ?> night(s)</span>
+                                    <span class="badge bg-info" id="duration-display"><?= $booking['duration_nights'] ?> night(s)</span>
                                 </div>
                             </div>
                         </div>
@@ -229,11 +229,11 @@ include INCLUDES_PATH . '/header.php';
                     </tr>
                     <tr>
                         <td>Tax (<?= $booking['tax_rate'] ?>%):</td>
-                        <td class="text-end"><?= formatCurrency($booking['total_room_amount'] * $booking['tax_rate'] / 100) ?></td>
+                        <td class="text-end"><?= formatCurrency($booking['tax_amount']) ?></td>
                     </tr>
                     <tr>
                         <td>Service Fee (<?= $booking['service_rate'] ?>%):</td>
-                        <td class="text-end"><?= formatCurrency($booking['total_room_amount'] * $booking['service_rate'] / 100) ?></td>
+                        <td class="text-end"><?= formatCurrency($booking['service_amount']) ?></td>
                     </tr>
                     <tr class="border-top">
                         <td><strong>Grand Total:</strong></td>
@@ -299,5 +299,35 @@ include INCLUDES_PATH . '/header.php';
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkinInput = document.getElementById('checkin_date');
+        const checkoutInput = document.getElementById('checkout_date');
+        const durationDisplay = document.getElementById('duration-display');
+
+        function calculateDuration() {
+            if (checkinInput.value && checkoutInput.value) {
+                const checkinDate = new Date(checkinInput.value);
+                const checkoutDate = new Date(checkoutInput.value);
+
+                if (checkoutDate > checkinDate) {
+                    const timeDiff = checkoutDate.getTime() - checkinDate.getTime();
+                    const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                    durationDisplay.textContent = nights + ' night(s)';
+                } else {
+                    durationDisplay.textContent = '0 night(s)';
+                }
+            }
+        }
+
+        // Calculate duration when dates change
+        checkinInput.addEventListener('change', calculateDuration);
+        checkoutInput.addEventListener('change', calculateDuration);
+
+        // Calculate initial duration
+        calculateDuration();
+    });
+</script>
 
 <?php include INCLUDES_PATH . '/footer.php'; ?>

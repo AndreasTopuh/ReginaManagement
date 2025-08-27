@@ -33,7 +33,36 @@ endif; ?>
                 <h5><i class="fas fa-user-edit"></i> User Information</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="<?= BASE_URL ?>/users/<?= $user['id'] ?>">
+                <form method="POST" action="<?= BASE_URL ?>/users/<?= $user['id'] ?>" enctype="multipart/form-data">
+                    <!-- Profile Photo Display Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-12 text-center">
+                            <div class="profile-photo-display mb-3">
+                                <?php if (!empty($user['photo'])): ?>
+                                    <img src="<?= BASE_URL ?>/images/imageUsers/<?= htmlspecialchars($user['photo']) ?>"
+                                        alt="<?= htmlspecialchars($user['name']) ?>"
+                                        class="profile-main-photo"
+                                        data-original="<?= BASE_URL ?>/images/imageUsers/<?= htmlspecialchars($user['photo']) ?>"
+                                        style="width: 200px; height: 200px; object-fit: cover; border-radius: 50%; border: 4px solid #dee2e6; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                <?php else: ?>
+                                    <div class="profile-main-photo-placeholder"
+                                        style="width: 200px; height: 200px; border-radius: 50%; border: 4px solid #dee2e6; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; font-weight: bold; margin: 0 auto;">
+                                        <?= strtoupper(substr($user['name'], 0, 2)) ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <p class="text-muted">
+                                <i class="fas fa-camera"></i> Profile Photo
+                                <?php if (!empty($user['photo'])): ?>
+                                    <span class="badge bg-success ms-2">Has Photo</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary ms-2">No Photo</span>
+                                <?php endif; ?>
+                            </p>
+                            <p class="small text-muted">Upload a new photo to replace current image</p>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -65,6 +94,41 @@ endif; ?>
                                 <label for="phone" class="form-label">Phone</label>
                                 <input type="tel" class="form-control" id="phone" name="phone"
                                     value="<?= htmlspecialchars($form_data['phone'] ?? '') ?>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="photo" class="form-label">Profile Photo</label>
+                                <?php if (!empty($user['photo'])): ?>
+                                    <div class="current-photo mb-3">
+                                        <p class="mb-2">Current Photo:</p>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="photo-display-container">
+                                                <img src="<?= BASE_URL ?>/images/imageUsers/<?= htmlspecialchars($user['photo']) ?>"
+                                                    alt="Current Photo"
+                                                    class="current-photo-image"
+                                                    style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 3px solid #dee2e6;">
+                                            </div>
+                                            <div>
+                                                <button type="button" class="btn btn-danger btn-sm"
+                                                    onclick="deleteCurrentPhoto(<?= $user['id'] ?>)">
+                                                    <i class="fas fa-trash"></i> Delete Photo
+                                                </button>
+                                                <p class="small text-muted mt-2 mb-0">Current profile photo</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+                                <div class="form-text">
+                                    Optional. Supported formats: JPEG, PNG, GIF. Maximum size: 5MB.<br>
+                                    <strong>Auto-processing:</strong> Images will be automatically resized to 300x300px and optimized.
+                                </div>
+                                <div id="imagePreview" class="mt-3"></div>
                             </div>
                         </div>
                     </div>
@@ -203,6 +267,110 @@ endif; ?>
         // Trigger confirm password validation
         confirmPassword.dispatchEvent(new Event('input'));
     });
+
+    // Photo preview with enhanced display
+    document.getElementById('photo').addEventListener('change', function() {
+        const file = this.files[0];
+        const preview = document.getElementById('imagePreview');
+        const mainPhoto = document.querySelector('.profile-main-photo, .profile-main-photo-placeholder');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Update the main profile photo display
+                if (mainPhoto) {
+                    if (mainPhoto.tagName === 'IMG') {
+                        mainPhoto.src = e.target.result;
+                    } else {
+                        // Replace placeholder with actual image
+                        const newImg = document.createElement('img');
+                        newImg.src = e.target.result;
+                        newImg.alt = 'New Profile Photo';
+                        newImg.className = 'profile-main-photo';
+                        newImg.style.cssText = 'width: 200px; height: 200px; object-fit: cover; border-radius: 50%; border: 4px solid #dee2e6; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+                        mainPhoto.parentNode.replaceChild(newImg, mainPhoto);
+                    }
+                }
+
+                const img = new Image();
+                img.onload = function() {
+                    // Calculate processing info
+                    const size = Math.min(this.width, this.height);
+                    const finalSize = size > 300 ? 300 : size;
+                    const needsCrop = size < Math.max(this.width, this.height);
+                    const needsResize = size > 300;
+
+                    preview.innerHTML = `
+                        <div class="photo-preview-container p-3 border rounded bg-light">
+                            <h6><i class="fas fa-eye"></i> Photo Preview</h6>
+                            <div class="row align-items-center">
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <p class="small mb-2"><strong>Original</strong></p>
+                                        <img src="${e.target.result}" alt="Original" 
+                                             style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #dee2e6;">
+                                        <p class="small text-muted mt-1">${this.width}x${this.height}px</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-1 text-center">
+                                    <i class="fas fa-arrow-right text-primary preview-arrow"></i>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <p class="small mb-2"><strong>Processed</strong></p>
+                                        <img src="${e.target.result}" alt="Preview" 
+                                             style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 2px solid #007bff;">
+                                        <p class="small text-muted mt-1">${finalSize}x${finalSize}px</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="small file-info">
+                                        <p class="mb-1"><strong>File:</strong> ${file.name}</p>
+                                        <p class="mb-1 text-muted">Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                        ${needsCrop ? '<span class="badge bg-info processing-indicator crop"><i class="fas fa-crop"></i> Crop</span><br>' : ''}
+                                        ${needsResize ? '<span class="badge bg-success processing-indicator resize"><i class="fas fa-compress"></i> Resize</span><br>' : ''}
+                                        <span class="badge bg-warning processing-indicator optimize"><i class="fas fa-magic"></i> Optimize</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-photo-action" onclick="clearPhotoPreview()">
+                                    <i class="fas fa-times"></i> Remove Preview
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = '';
+        }
+    });
+
+    // Clear photo preview function
+    function clearPhotoPreview() {
+        document.getElementById('imagePreview').innerHTML = '';
+        document.getElementById('photo').value = '';
+
+        // Reset main photo display
+        const mainPhoto = document.querySelector('.profile-main-photo');
+        if (mainPhoto && mainPhoto.dataset.original) {
+            mainPhoto.src = mainPhoto.dataset.original;
+        }
+    }
+
+    // Delete current photo function
+    function deleteCurrentPhoto(userId) {
+        if (confirm('Are you sure you want to delete this photo?')) {
+            window.location.href = '<?= BASE_URL ?>/users/' + userId + '/delete-photo';
+        }
+    }
+
+    // Make functions globally available
+    window.clearPhotoPreview = clearPhotoPreview;
+    window.deleteCurrentPhoto = deleteCurrentPhoto;
 </script>
 
 <?php include INCLUDES_PATH . '/footer.php'; ?>

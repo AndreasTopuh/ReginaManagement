@@ -221,6 +221,17 @@ class UserController extends BaseController
                 exit;
             }
 
+            // Handle photo upload
+            if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+                try {
+                    $photo_filename = $this->userModel->uploadPhoto($_FILES['photo'], $user_id);
+                } catch (Exception $e) {
+                    $_SESSION['error'] = "Failed to upload photo: " . $e->getMessage();
+                    header('Location: ' . BASE_URL . '/profile');
+                    exit;
+                }
+            }
+
             // Update profile data
             $update_data = [
                 'name' => $data['name'],
@@ -247,6 +258,39 @@ class UserController extends BaseController
         }
 
         header('Location: ' . BASE_URL . '/profile');
+        exit;
+    }
+
+    public function deletePhoto($user_id = null)
+    {
+        requireLogin();
+
+        // If no user_id provided, assume it's current user's profile
+        if ($user_id === null) {
+            $user_id = $_SESSION['user_id'];
+            $redirect_url = BASE_URL . '/profile';
+        } else {
+            // Check if user can delete other users' photos
+            if (!in_array(SessionManager::getUserRole(), ['Owner', 'Admin'])) {
+                $_SESSION['error'] = "Access denied.";
+                header('Location: ' . BASE_URL . '/users');
+                exit;
+            }
+            $redirect_url = BASE_URL . '/users/' . $user_id . '/edit';
+        }
+
+        try {
+            if ($this->userModel->deletePhoto($user_id)) {
+                $_SESSION['success'] = 'Photo deleted successfully.';
+            } else {
+                $_SESSION['error'] = 'No photo to delete or failed to delete photo.';
+            }
+        } catch (Exception $e) {
+            error_log("Delete photo error: " . $e->getMessage());
+            $_SESSION['error'] = 'Failed to delete photo.';
+        }
+
+        header('Location: ' . $redirect_url);
         exit;
     }
 
@@ -288,14 +332,35 @@ class UserController extends BaseController
                 exit;
             }
 
-            if ($this->userModel->createUser($data)) {
-                $_SESSION['success'] = "User created successfully.";
-                header('Location: ' . BASE_URL . '/users');
+            // Handle photo upload
+            if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+                try {
+                    // Create user first to get user ID
+                    if ($this->userModel->createUser($data)) {
+                        $user_id = Database::getInstance()->lastInsertId();
+                        $photo_filename = $this->userModel->uploadPhoto($_FILES['photo'], $user_id);
+                        $_SESSION['success'] = "User created successfully with photo.";
+                    } else {
+                        $_SESSION['error'] = "Failed to create user.";
+                        $_SESSION['form_data'] = $data;
+                        header('Location: ' . BASE_URL . '/users/create');
+                        exit;
+                    }
+                } catch (Exception $e) {
+                    $_SESSION['error'] = "User created but failed to upload photo: " . $e->getMessage();
+                }
             } else {
-                $_SESSION['error'] = "Failed to create user.";
-                $_SESSION['form_data'] = $data;
-                header('Location: ' . BASE_URL . '/users/create');
+                if ($this->userModel->createUser($data)) {
+                    $_SESSION['success'] = "User created successfully.";
+                } else {
+                    $_SESSION['error'] = "Failed to create user.";
+                    $_SESSION['form_data'] = $data;
+                    header('Location: ' . BASE_URL . '/users/create');
+                    exit;
+                }
             }
+
+            header('Location: ' . BASE_URL . '/users');
         } catch (Exception $e) {
             $_SESSION['error'] = "Error: " . $e->getMessage();
             $_SESSION['form_data'] = $_POST;
@@ -348,6 +413,19 @@ class UserController extends BaseController
                 $_SESSION['form_data'] = $data;
                 header('Location: ' . BASE_URL . '/users/' . $user_id . '/edit');
                 exit;
+            }
+
+            // Handle photo upload
+            if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+                try {
+                    $photo_filename = $this->userModel->uploadPhoto($_FILES['photo'], $user_id);
+                    $data['photo'] = $photo_filename;
+                } catch (Exception $e) {
+                    $_SESSION['error'] = "Failed to upload photo: " . $e->getMessage();
+                    $_SESSION['form_data'] = $data;
+                    header('Location: ' . BASE_URL . '/users/' . $user_id . '/edit');
+                    exit;
+                }
             }
 
             if ($this->userModel->updateUser($data)) {

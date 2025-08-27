@@ -33,7 +33,7 @@ endif; ?>
                 <h5><i class="fas fa-user-plus"></i> User Information</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="<?= BASE_URL ?>/users">
+                <form method="POST" action="<?= BASE_URL ?>/users" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -65,6 +65,20 @@ endif; ?>
                                 <label for="phone" class="form-label">Phone</label>
                                 <input type="tel" class="form-control" id="phone" name="phone"
                                     value="<?= htmlspecialchars($form_data['phone'] ?? '') ?>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="photo" class="form-label">Profile Photo</label>
+                                <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+                                <div class="form-text">
+                                    Optional. Supported formats: JPEG, PNG, GIF. Maximum size: 5MB.<br>
+                                    <strong>Auto-processing:</strong> Images will be automatically resized to 300x300px and optimized.
+                                </div>
+                                <div id="imagePreview" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -168,6 +182,30 @@ endif; ?>
             this.setCustomValidity('Username must be at least 3 characters');
         } else {
             this.setCustomValidity('');
+        }
+    });
+
+    // Photo preview
+    document.getElementById('photo').addEventListener('change', function() {
+        const file = this.files[0];
+        const preview = document.getElementById('imagePreview');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <img src="${e.target.result}" alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+                        <div class="ms-3">
+                            <p class="mb-1"><strong>File:</strong> ${file.name}</p>
+                            <p class="mb-0 text-muted">Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = '';
         }
     });
 </script>

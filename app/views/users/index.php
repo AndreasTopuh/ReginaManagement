@@ -48,6 +48,7 @@ endif; ?>
                             <thead class="table-dark">
                                 <tr>
                                     <th>ID</th>
+                                    <th>Photo</th>
                                     <th>Full Name</th>
                                     <th>Username</th>
                                     <th>Email</th>
@@ -62,6 +63,9 @@ endif; ?>
                                 <?php foreach ($users as $user): ?>
                                     <tr>
                                         <td><?= $user['id'] ?></td>
+                                        <td>
+                                            <?= displayUserAvatar($user, 40) ?>
+                                        </td>
                                         <td>
                                             <strong><?= htmlspecialchars($user['name']) ?></strong>
                                         </td>

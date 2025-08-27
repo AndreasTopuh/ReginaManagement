@@ -168,24 +168,103 @@ class Booking
     public function update($id, $booking_data)
     {
         try {
+            $this->db->beginTransaction();
+
+            // Calculate new duration
+            $checkin = new DateTime($booking_data['checkin_date']);
+            $checkout = new DateTime($booking_data['checkout_date']);
+            $duration_nights = $checkout->diff($checkin)->days;
+
+            // Update booking basic info
             $sql = "UPDATE bookings SET 
-                        checkin_date = ?, checkout_date = ?, meal_plan = ?, 
-                        special_request = ?, updated_at = NOW()
+                        checkin_date = ?, checkout_date = ?, duration_nights = ?, 
+                        meal_plan = ?, special_request = ?, updated_at = NOW()
                     WHERE id = ?";
 
             $params = [
                 $booking_data['checkin_date'],
                 $booking_data['checkout_date'],
+                $duration_nights,
                 $booking_data['meal_plan'],
                 $booking_data['special_request'],
                 $id
             ];
 
-            return $this->db->execute($sql, $params);
+            $this->db->execute($sql, $params);
+
+            // Recalculate booking rooms with new duration
+            $this->recalculateBookingRooms($id, $duration_nights);
+
+            // Recalculate booking totals
+            $this->recalculateBookingTotals($id);
+
+            // Add booking history entry
+            $this->addHistory($id, 'updated', 'Booking diupdate - Duration: ' . $duration_nights . ' night(s)');
+
+            $this->db->commit();
+            return true;
         } catch (Exception $e) {
+            $this->db->rollback();
             error_log("Booking update error: " . $e->getMessage());
             throw $e;
         }
+    }
+
+    private function recalculateBookingRooms($booking_id, $duration_nights)
+    {
+        // Get all booking rooms
+        $sql = "SELECT * FROM booking_rooms WHERE booking_id = ?";
+        $booking_rooms = $this->db->fetchAll($sql, [$booking_id]);
+
+        foreach ($booking_rooms as $room) {
+            $new_subtotal = $room['rate_per_night'] * $duration_nights;
+
+            $update_sql = "UPDATE booking_rooms SET 
+                            nights = ?, subtotal = ?
+                          WHERE booking_id = ? AND room_id = ?";
+
+            $this->db->execute($update_sql, [
+                $duration_nights,
+                $new_subtotal,
+                $booking_id,
+                $room['room_id']
+            ]);
+        }
+    }
+
+    private function recalculateBookingTotals($booking_id)
+    {
+        // Get current booking data
+        $booking = $this->findById($booking_id);
+
+        // Calculate new total room amount
+        $sql = "SELECT SUM(subtotal) as total_room_amount FROM booking_rooms WHERE booking_id = ?";
+        $result = $this->db->fetchOne($sql, [$booking_id]);
+        $total_room_amount = $result['total_room_amount'] ?? 0;
+
+        // Use existing tax and service rates, or default values
+        $tax_rate = $booking['tax_rate'] ?? 10;
+        $service_rate = $booking['service_rate'] ?? 5;
+
+        // Calculate tax and service amounts
+        $tax_amount = $total_room_amount * $tax_rate / 100;
+        $service_amount = $total_room_amount * $service_rate / 100;
+        $grand_total = $total_room_amount + $tax_amount + $service_amount;
+
+        // Update booking totals
+        $update_sql = "UPDATE bookings SET 
+                        total_room_amount = ?, total_service_amount = ?, 
+                        tax_amount = ?, service_amount = ?, grand_total = ?
+                      WHERE id = ?";
+
+        $this->db->execute($update_sql, [
+            $total_room_amount,
+            $service_amount, // total_service_amount
+            $tax_amount,
+            $service_amount, // service_amount
+            $grand_total,
+            $booking_id
+        ]);
     }
 
     public function updateStatus($id, $status)

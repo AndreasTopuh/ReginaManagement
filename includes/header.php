@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="<?= ASSETS_URL ?>/css/style.css" rel="stylesheet">
+    <link href="<?= ASSETS_URL ?>/css/user-photos.css" rel="stylesheet">
 
     <!-- Prevent sidebar flicker by loading state early -->
     <script>
@@ -264,8 +265,21 @@
 
                 <div class="d-flex align-items-center">
                     <div class="dropdown">
-                        <button class="btn btn-link dropdown-toggle text-decoration-none" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle fa-lg me-2"></i>
+                        <button class="btn btn-link dropdown-toggle text-decoration-none d-flex align-items-center" type="button" data-bs-toggle="dropdown">
+                            <?php
+                            // Get current user's photo
+                            $currentUser = null;
+                            if (class_exists('User') && isset($_SESSION['user_id'])) {
+                                $userModel = new User();
+                                $currentUser = $userModel->findById($_SESSION['user_id']);
+                            }
+
+                            if ($currentUser) {
+                                echo displayUserAvatar($currentUser, 32, 'me-2');
+                            } else {
+                                echo '<i class="fas fa-user-circle fa-lg me-2"></i>';
+                            }
+                            ?>
                             <span><?= $_SESSION['name'] ?></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">

@@ -38,6 +38,7 @@ require_once APP_PATH . '/models/Guest.php';
 
 // Load helpers
 require_once APP_PATH . '/helpers/SessionManager.php';
+require_once APP_PATH . '/helpers/ImageProcessor.php';
 
 // Initialize router
 $router = new Router();
@@ -93,6 +94,7 @@ $router->post('/users/{id}/edit', 'UserController@edit');
 $router->post('/users/{id}', 'UserController@edit');  // For edit form submission
 $router->post('/users/{id}/delete', 'UserController@delete');
 $router->post('/users/{id}/toggle-status', 'UserController@toggleStatus');
+$router->get('/users/{id}/delete-photo', 'UserController@deletePhoto');
 
 // === REVENUE ROUTES ===
 $router->get('/revenue', 'RevenueController@index');
@@ -103,6 +105,7 @@ $router->get('/revenue/chart-data', 'RevenueController@chartData');
 // === PROFILE ROUTES ===
 $router->get('/profile', 'UserController@profile');
 $router->post('/profile', 'UserController@updateProfile');
+$router->get('/profile/delete-photo', 'UserController@deletePhoto');
 
 // === API ROUTES (for AJAX) ===
 $router->get('/api/rooms/available', 'RoomController@getAvailableRooms');

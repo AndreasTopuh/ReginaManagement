@@ -1,0 +1,315 @@
+/* User Photo Styles */
+.user-avatar {
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-avatar-small {
+    border: 1px solid #dee2e6;
+}
+
+.user-avatar-initials {
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.photo-upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.photo-upload-area:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.current-photo-display {
+    position: relative;
+    display: inline-block;
+}
+
+.current-photo-display .photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.current-photo-display:hover .photo-overlay {
+    opacity: 1;
+}
+
+.photo-preview {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.photo-preview-container {
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+.crop-preview {
+    border: 2px dashed #007bff;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.processing-info {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.size-comparison {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.size-comparison .before,
+.size-comparison .after {
+    text-align: center;
+}
+
+.size-comparison .arrow {
+    font-size: 24px;
+    color: #007bff;
+}
+
+/* Loading animation for image processing */
+.image-processing {
+    position: relative;
+    opacity: 0.7;
+}
+
+.image-processing::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #007bff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Main profile photo display */
+.profile-main-photo {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-main-photo:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+.profile-main-photo-placeholder {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-main-photo-placeholder:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.profile-photo-display {
+    position: relative;
+}
+
+.profile-photo-display::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 210px;
+    height: 210px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profile-photo-display:hover::before {
+    opacity: 0.1;
+}
+
+/* Current photo display */
+.current-photo-image {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.current-photo-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.photo-display-container {
+    position: relative;
+    display: inline-block;
+}
+
+.photo-display-container::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.photo-display-container:hover::after {
+    opacity: 1;
+}
+
+/* Enhanced photo preview */
+.photo-preview-container {
+    border: 2px dashed #007bff !important;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%) !important;
+    border-radius: 12px !important;
+}
+
+.photo-preview-container .btn {
+    transition: all 0.3s ease;
+}
+
+.photo-preview-container .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Processing indicators */
+.processing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.processing-indicator.crop {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.processing-indicator.resize {
+    background-color: #e8f5e8;
+    color: #388e3c;
+}
+
+.processing-indicator.optimize {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+/* Arrow animation */
+.preview-arrow {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.7;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.7;
+    }
+}
+
+/* File info styling */
+.file-info {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.file-info .badge {
+    font-size: 10px;
+    padding: 4px 8px;
+}
+
+/* Button enhancements */
+.btn-photo-action {
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-photo-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-photo-action.btn-danger:hover {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+/* Upload file input enhancement */
+.form-control[type="file"] {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.form-control[type="file"]:hover {
+    border-color: #007bff;
+    background: #e3f2fd;
+}
+
+.form-control[type="file"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    background: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .user-avatar {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .photo-upload-area {
+        padding: 15px;
+    }
+}
