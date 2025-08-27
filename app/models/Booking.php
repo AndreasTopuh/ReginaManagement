@@ -8,15 +8,18 @@ class Booking
         $this->db = Database::getInstance();
     }
 
-    public function getAll($search = '', $checkin_from = '', $checkout_to = '', $status = '')
+    public function getAll($search = '', $checkin_from = '', $checkout_to = '', $status = '', $sort = '')
     {
-        $sql = "SELECT b.*, g.full_name as guest_name, u.name as created_by_name,
-                    GROUP_CONCAT(r.room_number ORDER BY r.room_number SEPARATOR ', ') as room_numbers
+        $sql = "SELECT b.*, g.full_name as guest_name, u.name as created_by_name, ro.role_name as created_by_role,
+                    GROUP_CONCAT(r.room_number ORDER BY r.room_number SEPARATOR ', ') as room_numbers,
+                    GROUP_CONCAT(DISTINCT f.floor_number ORDER BY f.floor_number SEPARATOR ', ') as floor_numbers
                 FROM bookings b 
                 JOIN guests g ON b.guest_id = g.id 
                 JOIN users u ON b.created_by = u.id 
+                JOIN roles ro ON u.role_id = ro.id
                 LEFT JOIN booking_rooms br ON b.id = br.booking_id
-                LEFT JOIN rooms r ON br.room_id = r.id";
+                LEFT JOIN rooms r ON br.room_id = r.id
+                LEFT JOIN floors f ON r.floor_id = f.id";
 
         $conditions = [];
         $params = [];
@@ -43,11 +46,84 @@ class Booking
             $params[] = $status;
         }
 
+        // Handle sorting filters that act as WHERE conditions
+        if (!empty($sort)) {
+            switch ($sort) {
+                case 'created_owner':
+                    $conditions[] = "ro.role_name = 'Owner'";
+                    break;
+                case 'created_admin':
+                    $conditions[] = "ro.role_name = 'Admin'";
+                    break;
+                case 'created_receptionist':
+                    $conditions[] = "ro.role_name = 'Receptionist'";
+                    break;
+                case 'floor_1':
+                case 'floor_2':
+                case 'floor_3':
+                case 'floor_4':
+                case 'floor_5':
+                    $floor_num = str_replace('floor_', '', $sort);
+                    $conditions[] = "f.floor_number = ?";
+                    $params[] = $floor_num;
+                    break;
+                case 'status_checkedout':
+                    $conditions[] = "b.status = 'CheckedOut'";
+                    break;
+                case 'status_checkedin':
+                    $conditions[] = "b.status = 'CheckedIn'";
+                    break;
+                case 'status_canceled':
+                    $conditions[] = "b.status = 'Canceled'";
+                    break;
+            }
+        }
+
         if (!empty($conditions)) {
             $sql .= " WHERE " . implode(" AND ", $conditions);
         }
 
-        $sql .= " GROUP BY b.id ORDER BY b.created_at DESC";
+        $sql .= " GROUP BY b.id";
+
+        // Handle ORDER BY for sorting
+        if (!empty($sort)) {
+            switch ($sort) {
+                case 'newest':
+                    $sql .= " ORDER BY b.created_at DESC";
+                    break;
+                case 'oldest':
+                    $sql .= " ORDER BY b.created_at ASC";
+                    break;
+                case 'price_high':
+                    $sql .= " ORDER BY b.grand_total DESC";
+                    break;
+                case 'price_low':
+                    $sql .= " ORDER BY b.grand_total ASC";
+                    break;
+                case 'created_owner':
+                case 'created_admin':
+                case 'created_receptionist':
+                    $sql .= " ORDER BY u.name ASC, b.created_at DESC";
+                    break;
+                case 'floor_1':
+                case 'floor_2':
+                case 'floor_3':
+                case 'floor_4':
+                case 'floor_5':
+                    $sql .= " ORDER BY f.floor_number ASC, r.room_number ASC, b.created_at DESC";
+                    break;
+                case 'status_checkedout':
+                case 'status_checkedin':
+                case 'status_canceled':
+                    $sql .= " ORDER BY b.status ASC, b.created_at DESC";
+                    break;
+                default:
+                    $sql .= " ORDER BY b.created_at DESC";
+                    break;
+            }
+        } else {
+            $sql .= " ORDER BY b.created_at DESC";
+        }
 
         return $this->db->fetchAll($sql, $params);
     }

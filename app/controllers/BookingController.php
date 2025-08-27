@@ -21,8 +21,9 @@ class BookingController extends BaseController
         $checkin_from = $_GET['checkin_from'] ?? '';
         $checkout_to = $_GET['checkout_to'] ?? '';
         $status = $_GET['status'] ?? '';
+        $sort = $_GET['sort'] ?? '';
 
-        $bookings = $this->bookingModel->getAll($search, $checkin_from, $checkout_to, $status);
+        $bookings = $this->bookingModel->getAll($search, $checkin_from, $checkout_to, $status, $sort);
 
         $this->render('bookings/index', [
             'title' => 'Bookings Management - Regina Hotel',
@@ -30,7 +31,8 @@ class BookingController extends BaseController
             'search' => $search,
             'checkin_from' => $checkin_from,
             'checkout_to' => $checkout_to,
-            'status' => $status
+            'status' => $status,
+            'sort' => $sort
         ]);
     }
 

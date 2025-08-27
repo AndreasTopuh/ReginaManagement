@@ -46,7 +46,38 @@ include INCLUDES_PATH . '/header.php';
                             <option value="Canceled" <?= ($_GET['status'] ?? '') === 'Canceled' ? 'selected' : '' ?>>Canceled</option>
                         </select>
                     </div>
-                    <div class="col-md-3 d-flex align-items-end gap-2">
+                    <div class="col-md-2">
+                        <label for="sort" class="form-label">Sort By</label>
+                        <select name="sort" id="sort" class="form-select">
+                            <option value="">Default</option>
+                            <optgroup label="Date">
+                                <option value="newest" <?= ($_GET['sort'] ?? '') === 'newest' ? 'selected' : '' ?>>Baru Baru</option>
+                                <option value="oldest" <?= ($_GET['sort'] ?? '') === 'oldest' ? 'selected' : '' ?>>Paling Lama</option>
+                            </optgroup>
+                            <optgroup label="Price">
+                                <option value="price_high" <?= ($_GET['sort'] ?? '') === 'price_high' ? 'selected' : '' ?>>Harga Paling Mahal</option>
+                                <option value="price_low" <?= ($_GET['sort'] ?? '') === 'price_low' ? 'selected' : '' ?>>Harga Paling Murah</option>
+                            </optgroup>
+                            <optgroup label="Created By">
+                                <option value="created_owner" <?= ($_GET['sort'] ?? '') === 'created_owner' ? 'selected' : '' ?>>Created by Owner</option>
+                                <option value="created_admin" <?= ($_GET['sort'] ?? '') === 'created_admin' ? 'selected' : '' ?>>Created by Admin</option>
+                                <option value="created_receptionist" <?= ($_GET['sort'] ?? '') === 'created_receptionist' ? 'selected' : '' ?>>Created by Receptionist</option>
+                            </optgroup>
+                            <optgroup label="Floor">
+                                <option value="floor_1" <?= ($_GET['sort'] ?? '') === 'floor_1' ? 'selected' : '' ?>>Lantai 1</option>
+                                <option value="floor_2" <?= ($_GET['sort'] ?? '') === 'floor_2' ? 'selected' : '' ?>>Lantai 2</option>
+                                <option value="floor_3" <?= ($_GET['sort'] ?? '') === 'floor_3' ? 'selected' : '' ?>>Lantai 3</option>
+                                <option value="floor_4" <?= ($_GET['sort'] ?? '') === 'floor_4' ? 'selected' : '' ?>>Lantai 4</option>
+                                <option value="floor_5" <?= ($_GET['sort'] ?? '') === 'floor_5' ? 'selected' : '' ?>>Lantai 5</option>
+                            </optgroup>
+                            <optgroup label="Status">
+                                <option value="status_checkedout" <?= ($_GET['sort'] ?? '') === 'status_checkedout' ? 'selected' : '' ?>>Status: Checked Out</option>
+                                <option value="status_checkedin" <?= ($_GET['sort'] ?? '') === 'status_checkedin' ? 'selected' : '' ?>>Status: Checked In</option>
+                                <option value="status_canceled" <?= ($_GET['sort'] ?? '') === 'status_canceled' ? 'selected' : '' ?>>Status: Canceled</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-search"></i> Search
                         </button>
@@ -57,7 +88,7 @@ include INCLUDES_PATH . '/header.php';
                 </form>
 
                 <!-- Show active filters -->
-                <?php if (!empty($_GET['checkin_from']) || !empty($_GET['checkout_to']) || !empty($_GET['search']) || !empty($_GET['status'])): ?>
+                <?php if (!empty($_GET['checkin_from']) || !empty($_GET['checkout_to']) || !empty($_GET['search']) || !empty($_GET['status']) || !empty($_GET['sort'])): ?>
                     <div class="mt-3">
                         <div class="d-flex flex-wrap align-items-center gap-2">
                             <span class="text-muted">Active filters:</span>
@@ -94,6 +125,33 @@ include INCLUDES_PATH . '/header.php';
                                 <span class="badge bg-warning">
                                     Status: <?= htmlspecialchars($_GET['status']) ?>
                                     <a href="<?= BASE_URL ?>/bookings?<?= http_build_query(array_diff_key($_GET, ['status' => ''])) ?>"
+                                        class="text-white ms-1">×</a>
+                                </span>
+                            <?php endif; ?>
+
+                            <?php if (!empty($_GET['sort'])): ?>
+                                <?php
+                                $sort_labels = [
+                                    'newest' => 'Baru Baru',
+                                    'oldest' => 'Paling Lama',
+                                    'price_high' => 'Harga Paling Mahal',
+                                    'price_low' => 'Harga Paling Murah',
+                                    'created_owner' => 'Created by Owner',
+                                    'created_admin' => 'Created by Admin',
+                                    'created_receptionist' => 'Created by Receptionist',
+                                    'floor_1' => 'Lantai 1',
+                                    'floor_2' => 'Lantai 2',
+                                    'floor_3' => 'Lantai 3',
+                                    'floor_4' => 'Lantai 4',
+                                    'floor_5' => 'Lantai 5',
+                                    'status_checkedout' => 'Status: Checked Out',
+                                    'status_checkedin' => 'Status: Checked In',
+                                    'status_canceled' => 'Status: Canceled'
+                                ];
+                                ?>
+                                <span class="badge bg-primary">
+                                    Sort: <?= $sort_labels[$_GET['sort']] ?? htmlspecialchars($_GET['sort']) ?>
+                                    <a href="<?= BASE_URL ?>/bookings?<?= http_build_query(array_diff_key($_GET, ['sort' => ''])) ?>"
                                         class="text-white ms-1">×</a>
                                 </span>
                             <?php endif; ?>
@@ -196,5 +254,18 @@ include INCLUDES_PATH . '/header.php';
         </div>
     </div>
 </div>
+
+<script>
+    // Auto-submit form when sort option changes
+    document.getElementById('sort').addEventListener('change', function() {
+        document.getElementById('search-form').submit();
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
 
 <?php include INCLUDES_PATH . '/footer.php'; ?>
