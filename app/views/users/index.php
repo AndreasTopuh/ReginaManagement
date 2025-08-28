@@ -45,7 +45,7 @@ endif; ?>
                 <?php else: ?>
                     <div class="table-responsive">
                         <table class="table table-hover">
-                            <thead class="table-dark">
+                            <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
                                     <th>Photo</th>

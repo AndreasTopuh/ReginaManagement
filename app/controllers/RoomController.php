@@ -32,12 +32,39 @@ class RoomController extends BaseController
         }
 
         $status = $_GET['status'] ?? '';
+
+        // Get room types with room counts and images
+        $roomTypes = $this->roomModel->getRoomTypesWithDetails($status);
+
+        // Get all rooms for old table view (optional)
         $rooms = $this->roomModel->getAll($status);
 
         $this->render('rooms/index', [
             'title' => 'Rooms Management - Regina Hotel',
+            'roomTypes' => $roomTypes,
             'rooms' => $rooms,
             'status' => $status
+        ]);
+    }
+
+    public function showType($typeId)
+    {
+        $this->requireLogin();
+
+        // Get room type details
+        $roomType = $this->roomModel->getRoomTypeDetails($typeId);
+        if (!$roomType) {
+            $this->flashMessage('error', 'Room type tidak ditemukan.');
+            redirect('rooms');
+        }
+
+        // Get all rooms of this type
+        $rooms = $this->roomModel->getRoomsByType($typeId);
+
+        $this->render('rooms/type_detail', [
+            'title' => $roomType['type_name'] . ' Rooms - Regina Hotel',
+            'roomType' => $roomType,
+            'rooms' => $rooms
         ]);
     }
 

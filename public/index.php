@@ -69,6 +69,7 @@ $router->post('/bookings/{id}/cancel', 'BookingController@cancel');
 $router->get('/rooms', 'RoomController@index');
 $router->get('/rooms/create', 'RoomController@create');
 $router->post('/rooms', 'RoomController@store');
+$router->get('/rooms/type/{typeId}', 'RoomController@showType');
 $router->get('/rooms/{id}', 'RoomController@show');
 $router->get('/rooms/{id}/edit', 'RoomController@edit');
 $router->post('/rooms/{id}/edit', 'RoomController@edit');

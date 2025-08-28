@@ -171,6 +171,63 @@ class Room
         return $this->db->fetchOne($sql);
     }
 
+    public function getRoomTypesWithDetails($status = null)
+    {
+        $sql = "SELECT 
+                    rt.*,
+                    ri.image_filename,
+                    ri.image_title,
+                    COUNT(r.id) as total_rooms,
+                    SUM(CASE WHEN r.status = 'Available' THEN 1 ELSE 0 END) as available_rooms,
+                    SUM(CASE WHEN r.status = 'Occupied' THEN 1 ELSE 0 END) as occupied_rooms,
+                    SUM(CASE WHEN r.status = 'OutOfService' THEN 1 ELSE 0 END) as out_of_service_rooms
+                FROM room_types rt
+                LEFT JOIN room_images ri ON rt.id = ri.room_type_id AND ri.is_primary = 1
+                LEFT JOIN rooms r ON rt.id = r.type_id";
+
+        $params = [];
+        if ($status) {
+            $sql .= " AND r.status = ?";
+            $params[] = $status;
+        }
+
+        $sql .= " GROUP BY rt.id, ri.image_filename, ri.image_title
+                  ORDER BY rt.price ASC";
+
+        return $this->db->fetchAll($sql, $params);
+    }
+
+    public function getRoomTypeDetails($typeId)
+    {
+        $sql = "SELECT 
+                    rt.*,
+                    ri.image_filename,
+                    ri.image_title,
+                    COUNT(r.id) as total_rooms,
+                    SUM(CASE WHEN r.status = 'Available' THEN 1 ELSE 0 END) as available_rooms,
+                    SUM(CASE WHEN r.status = 'Occupied' THEN 1 ELSE 0 END) as occupied_rooms,
+                    SUM(CASE WHEN r.status = 'OutOfService' THEN 1 ELSE 0 END) as out_of_service_rooms
+                FROM room_types rt
+                LEFT JOIN room_images ri ON rt.id = ri.room_type_id AND ri.is_primary = 1
+                LEFT JOIN rooms r ON rt.id = r.type_id
+                WHERE rt.id = ?
+                GROUP BY rt.id, ri.image_filename, ri.image_title";
+
+        return $this->db->fetchOne($sql, [$typeId]);
+    }
+
+    public function getRoomsByType($typeId)
+    {
+        $sql = "SELECT r.*, rt.type_name, rt.price, f.floor_number
+                FROM rooms r 
+                JOIN room_types rt ON r.type_id = rt.id 
+                JOIN floors f ON r.floor_id = f.id
+                WHERE r.type_id = ?
+                ORDER BY r.room_number ASC";
+
+        return $this->db->fetchAll($sql, [$typeId]);
+    }
+
     private function updateFloorTotalRooms($floor_id)
     {
         $sql = "UPDATE floors SET total_rooms = (
