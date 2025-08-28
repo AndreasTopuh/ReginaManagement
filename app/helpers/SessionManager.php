@@ -6,11 +6,13 @@ class SessionManager {
     
     public static function start() {
         if (session_status() === PHP_SESSION_NONE) {
-            // Security settings
+            // Security settings for HTTPS
             if (!headers_sent()) {
                 ini_set('session.cookie_httponly', 1);
                 ini_set('session.use_only_cookies', 1);
-                ini_set('session.cookie_secure', isset($_SERVER['HTTPS']));
+                ini_set('session.cookie_secure', 1); // Force secure cookies for HTTPS
+                ini_set('session.cookie_samesite', 'Strict');
+                ini_set('session.gc_maxlifetime', 86400); // 24 hours
             }
             
             session_start();

@@ -5,9 +5,15 @@
  * Main Configuration File
  */
 
-// Error reporting (development mode)
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Error reporting (production mode)
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+
+// Production settings - uncomment for production
+error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', BASE_PATH . '/storage/logs/php_errors.log');
 
 // Base paths (only define if not already defined)
 if (!defined('BASE_PATH')) {
@@ -22,8 +28,12 @@ if (!defined('BASE_PATH')) {
 require_once APP_PATH . '/helpers/SessionManager.php';
 SessionManager::start();
 
-// Base URL (adjust according to your setup)
-define('BASE_URL', 'http://103.162.115.122/reginahotel/public');
+// Simple Base URL configuration for regina.kawanua.org
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+
+// Since Apache virtual host now points directly to /public folder
+define('BASE_URL', $protocol . '://' . $host);
 define('ASSETS_URL', BASE_URL . '/assets');
 
 // Database configuration
@@ -41,7 +51,7 @@ define('MIDTRANS_MERCHANT_ID', 'your-merchant-id-here');
 // Application settings
 define('APP_NAME', 'Regina Hotel Management System');
 define('APP_VERSION', '1.0.0');
-define('APP_DEBUG', true); // Set to false in production
+define('APP_DEBUG', false); // Set to false in production
 define('TIMEZONE', 'Asia/Jakarta');
 
 // Set timezone
@@ -73,8 +83,24 @@ require_once CONFIG_PATH . '/database.php';
 // Helper functions
 function redirect($url)
 {
-    header("Location: " . BASE_URL . $url);
+    $redirectUrl = rtrim(BASE_URL, '/') . '/' . ltrim($url, '/');
+    header("Location: " . $redirectUrl);
     exit();
+}
+
+function asset($path)
+{
+    return rtrim(ASSETS_URL, '/') . '/' . ltrim($path, '/');
+}
+
+function url($path = '')
+{
+    return rtrim(BASE_URL, '/') . '/' . ltrim($path, '/');
+}
+
+function isSecureConnection()
+{
+    return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
 }
 
 function isLoggedIn()
