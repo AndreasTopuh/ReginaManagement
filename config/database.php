@@ -6,14 +6,20 @@
 
 class Database {
     private static $instance = null;
-    private $host = 'localhost';
-    private $database = 'regina_hotel';
-    private $username = 'hotel_admin';
-    private $password = 'passwordku123';
+    private $host;
+    private $database;
+    private $username;
+    private $password;
     private $charset = 'utf8mb4';
     private $pdo;
     
     private function __construct() {
+        // Use constants from config.php
+        $this->host = DB_HOST;
+        $this->database = DB_NAME;
+        $this->username = DB_USER;
+        $this->password = DB_PASS;
+        
         $dsn = "mysql:host={$this->host};dbname={$this->database};charset={$this->charset}";
         
         $options = [

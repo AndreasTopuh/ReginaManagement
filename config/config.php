@@ -32,7 +32,6 @@ SessionManager::start();
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
 
-// Since Apache virtual host now points directly to /public folder
 define('BASE_URL', $protocol . '://' . $host);
 define('ASSETS_URL', BASE_URL . '/assets');
 
@@ -42,16 +41,16 @@ define('DB_NAME', 'regina_hotel');
 define('DB_USER', 'hotel_admin');
 define('DB_PASS', 'passwordku123');
 
-// Midtrans configuration (for Phase 3)
+// Midtrans configuration
 define('MIDTRANS_SERVER_KEY', 'your-server-key-here');
 define('MIDTRANS_CLIENT_KEY', 'your-client-key-here');
-define('MIDTRANS_IS_PRODUCTION', false); // Set to true for production
+define('MIDTRANS_IS_PRODUCTION', false);
 define('MIDTRANS_MERCHANT_ID', 'your-merchant-id-here');
 
 // Application settings
 define('APP_NAME', 'Regina Hotel Management System');
 define('APP_VERSION', '1.0.0');
-define('APP_DEBUG', false); // Set to false in production
+define('APP_DEBUG', false);
 define('TIMEZONE', 'Asia/Jakarta');
 
 // Set timezone
@@ -283,8 +282,6 @@ function displayUserAvatar($user, $size = 40, $classes = '', $imageSize = 'avata
     } else {
         $initials = getUserInitials($user['name']);
         $fontSize = floor($size * 0.4);
-        return '<div class="user-avatar-initials ' . $allClasses . ' d-flex align-items-center justify-content-center text-white" 
-                     style="width: ' . $size . 'px; height: ' . $size . 'px; font-size: ' . $fontSize . 'px; border-radius: 50%;">' .
-            $initials . '</div>';
+        return '<div class="user-avatar-initials ' . $allClasses . ' d-flex align-items-center justify-content-center text-white" style="width: ' . $size . 'px; height: ' . $size . 'px; font-size: ' . $fontSize . 'px; border-radius: 50%;">' . $initials . '</div>';
     }
 }
