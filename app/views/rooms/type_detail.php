@@ -32,7 +32,11 @@ include INCLUDES_PATH . '/header.php';
                 <?php if (!empty($roomType['image_filename'])): ?>
                     <img src="<?= BASE_URL ?>/images/imageRooms/<?= $roomType['image_filename'] ?>"
                         alt="<?= htmlspecialchars($roomType['type_name']) ?>"
-                        class="img-fluid rounded mb-3" style="max-height: 200px; object-fit: cover;">
+                        class="img-fluid rounded mb-3"
+                        style="max-height: 200px; object-fit: cover; cursor: pointer;"
+                        onclick="showImageModal('<?= BASE_URL ?>/images/imageRooms/<?= $roomType['image_filename'] ?>', '<?= htmlspecialchars($roomType['type_name']) ?> Room')"
+                        data-bs-toggle="tooltip"
+                        title="Click to view full size">
                 <?php else: ?>
                     <div class="bg-secondary rounded d-flex align-items-center justify-content-center mb-3" style="height: 200px;">
                         <i class="fas fa-bed fa-3x text-white"></i>
@@ -226,11 +230,52 @@ include INCLUDES_PATH . '/header.php';
     </div>
 </div>
 
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Room Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img id="modalImage" src="" alt="" class="img-fluid w-100" style="max-height: 80vh; object-fit: contain;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Function to show image in modal
+    function showImageModal(imageSrc, imageTitle) {
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('imageModalLabel');
+
+        modalImage.src = imageSrc;
+        modalImage.alt = imageTitle;
+        modalTitle.textContent = imageTitle;
+
+        modal.show();
+    }
+
+    // Add keyboard support for modal
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('imageModal'));
+            if (modal) {
+                modal.hide();
+            }
+        }
     });
 </script>
 

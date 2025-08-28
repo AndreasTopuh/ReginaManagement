@@ -8,10 +8,12 @@ include INCLUDES_PATH . '/header.php';
         border: 1px solid #ddd;
         border-radius: 10px;
         overflow: hidden;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         background: white;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        align-items: stretch;
     }
 
     .room-card:hover {
@@ -21,14 +23,18 @@ include INCLUDES_PATH . '/header.php';
     }
 
     .room-image {
-        width: 100%;
-        height: 200px;
+        width: 150px;
+        height: 250px;
         object-fit: cover;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        flex-shrink: 0;
     }
 
     .room-content {
-        padding: 15px;
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
     }
 
     .room-title {
@@ -144,7 +150,7 @@ include INCLUDES_PATH . '/header.php';
 
     .room-grid {
         display: grid;
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: 1.5fr 1fr;
         gap: 20px;
     }
 
@@ -174,18 +180,12 @@ include INCLUDES_PATH . '/header.php';
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1><i class="fas fa-bed"></i> Rooms Management</h1>
-
-            <?php if (hasPermission(['Owner', 'Admin'])): ?>
-                <a href="<?= BASE_URL ?>/rooms/create" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Add Room
-                </a>
-            <?php endif; ?>
         </div>
     </div>
 </div>
 
 <!-- Filter -->
-<div class="row mb-4">
+<!-- <div class="row mb-4">
     <div class="col-md-12">
         <div class="card">
             <div class="card-body">
@@ -207,7 +207,7 @@ include INCLUDES_PATH . '/header.php';
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- Rooms Grid -->
 <div class="room-grid">
@@ -267,14 +267,14 @@ include INCLUDES_PATH . '/header.php';
                             echo htmlspecialchars(substr($description, 0, 120)) . '...';
                             ?>
                         </div>
-                    </div>
 
-                    <div class="availability-info">
-                        <div class="availability-text">
-                            Available Room: <?= $roomType['available_rooms'] ?>/<?= $roomType['total_rooms'] ?>
-                        </div>
-                        <div class="room-price">
-                            <?= formatCurrency($roomType['price']) ?>/night
+                        <div class="availability-info">
+                            <div class="availability-text">
+                                Available Room: <?= $roomType['available_rooms'] ?>/<?= $roomType['total_rooms'] ?>
+                            </div>
+                            <div class="room-price">
+                                <?= formatCurrency($roomType['price']) ?>/night
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -378,9 +378,7 @@ include INCLUDES_PATH . '/header.php';
                 <button class="btn btn-outline-secondary btn-sm" onclick="editRoomType(${roomType.id})">
                     <i class="fas fa-edit"></i> Edit
                 </button>
-                <button class="btn btn-outline-warning btn-sm" onclick="setMaintenance(${roomType.id})">
-                    <i class="fas fa-tools"></i> Set Maintenance
-                </button>
+   
             </div>
         </div>
         <?php endif; ?>
