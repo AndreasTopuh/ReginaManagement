@@ -14,8 +14,9 @@ class ImageProcessor
     const AVATAR_SIZE = 80;        // Small avatars
     const HEADER_SIZE = 40;        // Header navigation
 
-    private $quality = 85;         // JPEG quality (1-100)
-    private $maxFileSize = 500000; // 500KB max after processing
+    private $quality = 90;         // JPEG quality (1-100) - increased for better quality
+    private $maxFileSize = 2 * 1024 * 1024; // 2MB max after processing - reduced from 500KB
+    private $maxUploadSize = 3 * 1024 * 1024; // 3MB max upload size - reduced from 5MB
 
     /**
      * Process uploaded image: resize, crop, and optimize
@@ -73,14 +74,15 @@ class ImageProcessor
             // Save optimized image
             $this->saveImage($targetImage, $filepath, $mimeType);
 
-            // Clean up memory
+            // Clean up memory immediately
             imagedestroy($sourceImage);
             imagedestroy($targetImage);
 
-            // Check if file size is acceptable
-            if (filesize($filepath) > $this->maxFileSize) {
-                // If still too large, reduce quality and try again
-                $this->reduceQuality($filepath, $mimeType);
+            // Optimize file size if needed (but with higher limit now)
+            $fileSize = filesize($filepath);
+            if ($fileSize > $this->maxFileSize) {
+                // If still too large, reduce quality more aggressively
+                $this->optimizeFileSize($filepath, $mimeType, $fileSize);
             }
 
             return $filename;
@@ -122,7 +124,6 @@ class ImageProcessor
     private function validateFile($file)
     {
         $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-        $maxUploadSize = 5 * 1024 * 1024; // 5MB
 
         if ($file['error'] !== UPLOAD_ERR_OK) {
             throw new Exception("File upload error: " . $file['error']);
@@ -132,8 +133,14 @@ class ImageProcessor
             throw new Exception("Invalid file type. Only JPEG, PNG, and GIF are allowed.");
         }
 
-        if ($file['size'] > $maxUploadSize) {
-            throw new Exception("File too large. Maximum size is 5MB.");
+        if ($file['size'] > $this->maxUploadSize) {
+            throw new Exception("File too large. Maximum size is " . ($this->maxUploadSize / (1024 * 1024)) . "MB.");
+        }
+
+        // Check if it's actually an image
+        $imageInfo = getimagesize($file['tmp_name']);
+        if (!$imageInfo) {
+            throw new Exception("Invalid image file - corrupted or not a real image.");
         }
     }
 
@@ -278,5 +285,35 @@ class ImageProcessor
         imagedestroy($thumbnail);
 
         return true;
+    }
+
+    /**
+     * Optimize file size by reducing quality
+     */
+    private function optimizeFileSize($filepath, $mimeType, $currentSize)
+    {
+        // Only optimize JPEG files for size
+        if ($mimeType !== 'image/jpeg') {
+            return;
+        }
+
+        $targetSize = $this->maxFileSize;
+        $quality = $this->quality;
+
+        // Reduce quality in steps until we reach acceptable file size
+        while ($currentSize > $targetSize && $quality > 60) {
+            $quality -= 10;
+
+            // Reload and resave with lower quality
+            $image = imagecreatefromjpeg($filepath);
+            if ($image) {
+                imagejpeg($image, $filepath, $quality);
+                imagedestroy($image);
+
+                $currentSize = filesize($filepath);
+            } else {
+                break;
+            }
+        }
     }
 }

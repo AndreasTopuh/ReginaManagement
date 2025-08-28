@@ -104,7 +104,8 @@ $router->get('/revenue/chart-data', 'RevenueController@chartData');
 
 // === PROFILE ROUTES ===
 $router->get('/profile', 'UserController@profile');
-$router->post('/profile', 'UserController@updateProfile');
+$router->get('/profile/edit', 'UserController@editProfile');
+$router->post('/profile/update', 'UserController@updateProfile');
 $router->get('/profile/delete-photo', 'UserController@deletePhoto');
 
 // === API ROUTES (for AJAX) ===

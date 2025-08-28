@@ -194,12 +194,42 @@ class UserController extends BaseController
         include APP_PATH . '/views/users/profile.php';
     }
 
+    public function editProfile()
+    {
+        requireLogin();
+
+        // Check if user has permission to edit profile
+        $userRole = SessionManager::getUserRole();
+        if (!in_array($userRole, ['Owner', 'Admin'])) {
+            $_SESSION['error'] = "Access denied. Only Owner and Admin can edit their profiles.";
+            header('Location: ' . BASE_URL . '/profile');
+            exit;
+        }
+
+        $user = $this->userModel->getUserById($_SESSION['user_id']);
+        if (!$user) {
+            $_SESSION['error'] = 'Profile not found.';
+            header('Location: ' . BASE_URL . '/dashboard');
+            exit;
+        }
+
+        include APP_PATH . '/views/users/profile_edit.php';
+    }
+
     public function updateProfile()
     {
         requireLogin();
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        // Check if user has permission to edit profile
+        $userRole = SessionManager::getUserRole();
+        if (!in_array($userRole, ['Owner', 'Admin'])) {
+            $_SESSION['error'] = "Access denied. Only Owner and Admin can edit their profiles.";
             header('Location: ' . BASE_URL . '/profile');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . '/profile/edit');
             exit;
         }
 
@@ -217,7 +247,8 @@ class UserController extends BaseController
             $errors = $this->validateProfileInput($data, $user_id);
             if (!empty($errors)) {
                 $_SESSION['error'] = implode('<br>', $errors);
-                header('Location: ' . BASE_URL . '/profile');
+                $_SESSION['form_data'] = $data;
+                header('Location: ' . BASE_URL . '/profile/edit');
                 exit;
             }
 
@@ -227,7 +258,8 @@ class UserController extends BaseController
                     $photo_filename = $this->userModel->uploadPhoto($_FILES['photo'], $user_id);
                 } catch (Exception $e) {
                     $_SESSION['error'] = "Failed to upload photo: " . $e->getMessage();
-                    header('Location: ' . BASE_URL . '/profile');
+                    $_SESSION['form_data'] = $data;
+                    header('Location: ' . BASE_URL . '/profile/edit');
                     exit;
                 }
             }
@@ -267,6 +299,14 @@ class UserController extends BaseController
 
         // If no user_id provided, assume it's current user's profile
         if ($user_id === null) {
+            // Check if current user has permission to edit their own profile
+            $userRole = SessionManager::getUserRole();
+            if (!in_array($userRole, ['Owner', 'Admin'])) {
+                $_SESSION['error'] = "Access denied. Only Owner and Admin can delete their profile photos.";
+                header('Location: ' . BASE_URL . '/profile');
+                exit;
+            }
+
             $user_id = $_SESSION['user_id'];
             $redirect_url = BASE_URL . '/profile';
         } else {
