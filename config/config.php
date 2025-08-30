@@ -51,7 +51,7 @@ define('MIDTRANS_MERCHANT_ID', 'your-merchant-id-here');
 define('APP_NAME', 'Regina Hotel Management System');
 define('APP_VERSION', '1.0.0');
 define('APP_DEBUG', false);
-define('TIMEZONE', 'Asia/Jakarta');
+define('TIMEZONE', 'Asia/Makassar');
 
 // Set timezone
 date_default_timezone_set(TIMEZONE);

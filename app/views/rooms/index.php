@@ -244,14 +244,14 @@ include INCLUDES_PATH . '/header.php';
                         <div class="room-title">
                             <?= htmlspecialchars($roomType['type_name']) ?> Room
                             <?php
-                            $status = 'Available';
-                            $statusClass = 'success';
-                            if ($roomType['available_rooms'] == 0) {
-                                $status = 'Occupied';
-                                $statusClass = 'danger';
-                            }
-                            ?>
-                            <span class="badge bg-<?= $statusClass ?> ms-2"><?= $status ?></span>
+                            // $status = 'Available';
+                            // $statusClass = 'success';
+                            // if ($roomType['available_rooms'] == 0) {
+                            //     $status = 'Occupied';
+                            //     $statusClass = 'danger';
+                            // }
+                            // ?>
+                            <!-- <span class="badge bg-<?= $statusClass ?> ms-2"><?= $status ?></span> -->
                         </div>
 
                         <div class="room-details">
@@ -333,9 +333,8 @@ include INCLUDES_PATH . '/header.php';
         panel.innerHTML = `
         ${imageHtml}
         
-        <div class="detail-title">
+        <div class="detail-title" style="font-size:2rem;">
             ${roomType.type_name} Room
-            <span class="badge bg-${statusClass} ms-2">${status}</span>
         </div>
         
         <div class="detail-specs">

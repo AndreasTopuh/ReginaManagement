@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Regina Hotel Management System
  * Database Configuration
  */
 
-class Database {
+class Database
+{
     private static $instance = null;
     private $host;
     private $database;
@@ -12,42 +14,49 @@ class Database {
     private $password;
     private $charset = 'utf8mb4';
     private $pdo;
-    
-    private function __construct() {
+
+    private function __construct()
+    {
         // Use constants from config.php
         $this->host = DB_HOST;
         $this->database = DB_NAME;
         $this->username = DB_USER;
         $this->password = DB_PASS;
-        
+
         $dsn = "mysql:host={$this->host};dbname={$this->database};charset={$this->charset}";
-        
+
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
-        
+
         try {
             $this->pdo = new PDO($dsn, $this->username, $this->password, $options);
+
+            // Set database timezone to match application timezone
+            $this->pdo->exec("SET time_zone = '+08:00'");
         } catch (PDOException $e) {
             error_log("Database connection error: " . $e->getMessage());
             throw new PDOException("Database connection failed. Please try again later.");
         }
     }
-    
-    public static function getInstance() {
+
+    public static function getInstance()
+    {
         if (self::$instance === null) {
             self::$instance = new self();
         }
         return self::$instance;
     }
-    
-    public function getConnection() {
+
+    public function getConnection()
+    {
         return $this->pdo;
     }
-    
-    public function query($sql, $params = []) {
+
+    public function query($sql, $params = [])
+    {
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($params);
@@ -57,8 +66,9 @@ class Database {
             throw $e;
         }
     }
-    
-    public function execute($sql, $params = []) {
+
+    public function execute($sql, $params = [])
+    {
         try {
             $stmt = $this->pdo->prepare($sql);
             return $stmt->execute($params);
@@ -67,30 +77,36 @@ class Database {
             throw $e;
         }
     }
-    
-    public function fetchOne($sql, $params = []) {
+
+    public function fetchOne($sql, $params = [])
+    {
         $stmt = $this->query($sql, $params);
         return $stmt->fetch();
     }
-    
-    public function fetchAll($sql, $params = []) {
+
+    public function fetchAll($sql, $params = [])
+    {
         $stmt = $this->query($sql, $params);
         return $stmt->fetchAll();
     }
-    
-    public function lastInsertId() {
+
+    public function lastInsertId()
+    {
         return $this->pdo->lastInsertId();
     }
-    
-    public function beginTransaction() {
+
+    public function beginTransaction()
+    {
         return $this->pdo->beginTransaction();
     }
-    
-    public function commit() {
+
+    public function commit()
+    {
         return $this->pdo->commit();
     }
-    
-    public function rollback() {
+
+    public function rollback()
+    {
         return $this->pdo->rollback();
     }
 }
